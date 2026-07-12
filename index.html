@@ -316,6 +316,7 @@
                     const bgX = (outWidth - bgWidth) / 2;
                     const bgY = (outHeight - bgHeight) / 2;
                     
+                    // Added visual padding calculation offset to match look perfectly
                     ctx.drawImage(baseImg, bgX - 55, bgY - 55, bgWidth + 110, bgHeight + 110);
                     ctx.filter = 'none';
                     
@@ -330,5 +331,4 @@
                     let fgHeight = (outWidth / nativeWidth) * nativeHeight;
 
                     if (fgHeight > outHeight) {
-                        fgHeight = outHeight;
-                        fgWidth = (outHeight / nativeHeight) * n
+                       
