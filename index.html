@@ -46,7 +46,7 @@
             <input type="file" id="image-input" accept="image/*" class="hidden">
 
             <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10 flex items-center justify-center">
-                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-100 transition-opacity duration-300 z-0"></div>
+                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl transition-opacity duration-300 z-0"></div>
                 <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
                 <img id="preview-img" src="" alt="Workspace Asset" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
             </div>
@@ -164,28 +164,31 @@
             if (e.target.files.length) handleFile(e.target.files[0]);
         });
 
+        // FIXED: Using FileReader dataURLs instead of temporary ObjectURLs prevents dynamic scope losses
         function handleFile(file) {
             if (!file) return;
             
-            const objectUrl = URL.createObjectURL(file);
-            const img = new Image();
-            
-            img.onload = () => {
-                nativeWidth = img.width;
-                nativeHeight = img.height;
-                currentImgSrc = objectUrl;
-                
-                uploadPlaceholder.classList.add('hidden');
-                canvasContainer.classList.remove('hidden');
-                downloadBtn.removeAttribute('disabled');
-                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    nativeWidth = img.width;
+                    nativeHeight = img.height;
+                    currentImgSrc = event.target.result;
+                    
+                    uploadPlaceholder.classList.add('hidden');
+                    canvasContainer.classList.remove('hidden');
+                    downloadBtn.removeAttribute('disabled');
+                    downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-                previewImg.src = currentImgSrc;
-                blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
-                
-                updateCanvasDimensions();
+                    previewImg.src = currentImgSrc;
+                    blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+                    
+                    updateCanvasDimensions();
+                };
+                img.src = event.target.result;
             };
-            img.src = objectUrl;
+            reader.readAsDataURL(file);
         }
 
         function setRatio(label, targetVal) {
@@ -325,10 +328,4 @@
                     renderForegroundAsset();
                 }
 
-                function renderForegroundAsset() {
-                    let fgWidth = outWidth;
-                    let fgHeight = (outWidth / nativeWidth) * nativeHeight;
-
-                    if (fgHeight > outHeight) {
-                        fgHeight = outHeight;
-                     
+                function renderForegro
