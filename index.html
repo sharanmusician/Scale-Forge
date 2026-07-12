@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniFrame Pro | Enterprise Image Framing Engine</title>
+    <!-- Tailwind CSS for premium styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for luxury typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-button { transition: all 0.3s ease; box-shadow: 0 0 0px rgba(99, 102, 241, 0); }
+        .glow-button:hover { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-indigo-500/30">
+
+    <!-- Premium Header -->
+    <header class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span class="text-white font-black text-xs tracking-wider">OF</span>
+            </div>
+            <div>
+                <span class="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">OmniFrame Pro</span>
+                <span class="text-xs block text-indigo-400 font-medium tracking-widest uppercase -mt-1">By Aethercore Interactive</span>
+            </div>
+        </div>
+        <span class="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400 hidden sm:inline-block">v2.4 Pro Engine</span>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Live Canvas Preview Area -->
+        <section class="lg:col-span-7 xl:col-span-8 w-full flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] bg-black/40 rounded-3xl border border-white/5 p-4 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+            
+            <!-- Upload Trigger Area -->
+            <div id="upload-placeholder" class="z-10 text-center p-6 cursor-pointer max-w-sm transition-transform duration-300 hover:scale-105" onclick="document.getElementById('image-input').click()">
+                <div class="mx-auto h-16 w-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
+                    <svg class="w-8 h-8 text-gray-400 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-medium text-white">Drop your asset or browse</h3>
+                <p class="text-sm text-gray-400 mt-1">Supports high-res RAW, PNG, JPEG up to 100MB</p>
+            </div>
+
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+
+            <!-- Interactive intelligent Studio Canvas Frame -->
+            <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10">
+                <!-- Dynamic Blurred Background -->
+                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-0 transition-opacity duration-300"></div>
+                <!-- Dynamic Solid Background -->
+                <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300"></div>
+                <!-- Foreground Main Image -->
+                <img id="preview-img" src="" alt="Workspace Asset" class="absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300">
+            </div>
+        </section>
+
+        <!-- Right Column: Micro-Console Controls Panel -->
+        <section class="lg:col-span-5 xl:col-span-4 space-y-6 w-full">
+            
+            <!-- Aspect Ratios Section -->
+            <div class="glass p-6 rounded-2xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">1. Aspect Ratios</h2>
+                    <span id="ratio-badge" class="text-xs bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20 font-mono">1:1</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2.5">
+                    <button onclick="setRatio('1:1', 1)" class="ratio-btn bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-medium hover:bg-white/10 transition-all border-indigo-500 bg-indigo-500/10 text-white">
+                        <div class="w-5 h-5 border-2 border-current rounded-sm opacity-80"></div> 1:1 Square
+                    </button>
+                    <button onclick="setRatio('16:9', 16/9)" class="ratio-btn bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-medium hover:bg-white/10 transition-all text-gray-400">
+                        <div class="w-7 h-4 border-2 border-current rounded-sm opacity-80"></div> 16:9 Video
+                    </button>
+                    <button onclick="setRatio('9:16', 9/16)" class="ratio-btn bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-medium hover:bg-white/10 transition-all text-gray-400">
+                        <div class="w-4 h-7 border-2 border-current rounded-sm opacity-80"></div> 9:16 Story
+                    </button>
+                    <button onclick="setRatio('4:3', 4/3)" class="ratio-btn bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-medium hover:bg-white/10 transition-all text-gray-400">
+                        <div class="w-6 h-4.5 border-2 border-current rounded-sm opacity-80"></div> 4:3 Photo
+                    </button>
+                    <button onclick="setRatio('Fullscreen', 'full')" class="ratio-btn bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-medium hover:bg-white/10 transition-all text-gray-400">
+                        <div class="w-6 h-6 border-2 border-dashed border-current rounded-sm opacity-80"></div> Fullscreen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Background FX Section -->
+            <div class="glass p-6 rounded-2xl space-y-4">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">2. FX & Canvas Background</h2>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setBgType('blur')" id="bg-blur-btn" class="bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Smart Blur FX
+                    </button>
+                    <button onclick="setBgType('solid')" id="bg-solid-btn" class="bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all">
+                        <div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-pink-500 to-indigo-500"></div>
+                        Chroma Color
+                    </button>
+                </div>
+
+                <!-- Color Palette Picker -->
+                <div id="color-picker-wrapper" class="hidden opacity-0 space-y-3 transition-all duration-300">
+                    <label class="text-xs text-gray-400 font-medium">Engine Palette Chroma Picker</label>
+                    <div class="flex items-center gap-3 bg-black/30 p-2.5 rounded-xl border border-white/5">
+                        <div class="relative w-10 h-10 rounded-full overflow-hidden border border-white/20 shadow-inner">
+                            <input type="color" id="color-picker" value="#6366f1" class="absolute inset-0 w-full h-full scale-150 cursor-pointer">
+                        </div>
+                        <div class="flex-grow">
+                            <input type="text" id="color-hex" value="#6366f1" class="bg-transparent text-sm font-mono text-white focus:outline-none w-full uppercase">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Pipeline Controls -->
+            <div class="space-y-3">
+                <button id="download-btn" disabled class="w-full glow-button bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg opacity-50 cursor-not-allowed text-sm uppercase tracking-wider">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Compile & Export Asset
+                </button>
+                <p class="text-[11px] text-center text-gray-500">Processed locally with end-to-end device-side hardware-acceleration.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Studio Info -->
+    <footer class="border-t border-white/5 px-6 py-4 text-center text-xs text-gray-500 font-mono">
+        &copy; 2026 Aethercore Interactive. All Rights Reserved. Powered by OmniFrame Processing Engines.
+    </footer>
+
+    <!-- Core Canvas Logic Script Engine -->
+    <script>
+        let currentImgSrc = '';
+        let nativeWidth = 0;
+        let nativeHeight = 0;
+        let selectedRatio = 1; 
+        let ratioMode = '1:1';
+        let backgroundType = 'blur'; 
+        let chromaColor = '#6366f1';
+
+        const imageInput = document.getElementById('image-input');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const canvasContainer = document.getElementById('canvas-container');
+        const previewImg = document.getElementById('preview-img');
+        const blurBg = document.getElementById('blur-bg');
+        const solidBg = document.getElementById('solid-bg');
+        const colorPicker = document.getElementById('color-picker');
+        const colorHex = document.getElementById('color-hex');
+        const downloadBtn = document.getElementById('download-btn');
+        const ratioBadge = document.getElementById('ratio-badge');
+
+        uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); uploadPlaceholder.classList.add('scale-95'); });
+        uploadPlaceholder.addEventListener('dragleave', () => { uploadPlaceholder.classList.remove('scale-95'); });
+        uploadPlaceholder.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadPlaceholder.classList.remove('scale-95');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    nativeWidth = img.width;
+                    nativeHeight = img.height;
+                    currentImgSrc = event.target.result;
+                    
+                    uploadPlaceholder.classList.add('hidden');
+                    canvasContainer.classList.remove('hidden');
+                    downloadBtn.removeAttribute('disabled');
+                    downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                    previewImg.src = currentImgSrc;
+                    blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+                    
+                    updateCanvasDimensions();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setRatio(label, targetVal) {
+            ratioMode = label;
+            selectedRatio = targetVal;
+            ratioBadge.innerText = label;
+
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-500/10', 'text-white');
+                btn.classList.add('text-gray-400');
+                if(btn.innerText.includes(label)) {
+                    btn.classList.add('border-indigo-500', 'bg-indigo-500/10', 'text-white');
+                    btn.classList.remove('text-gray-400');
+                }
+            });
+
+            updateCanvasDimensions();
+        }
+
+        function setBgType(type) {
+            backgroundType = type;
+            const blurBtn = document.getElementById('bg-blur-btn');
+            const solidBtn = document.getElementById('bg-solid-btn');
+            const pickerWrapper = document.getElementById('color-picker-wrapper');
+
+            if (type === 'blur') {
+                blurBtn.className = "bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
+                solidBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
+                pickerWrapper.classList.add('hidden', 'opacity-0');
+                blurBg.style.opacity = '1';
+                solidBg.style.backgroundColor = 'transparent';
+            } else {
+                solidBtn.className = "bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
+                blurBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
+                pickerWrapper.classList.remove('hidden');
+                setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
+                blurBg.style.opacity = '0';
+                solidBg.style.backgroundColor = chromaColor;
+            }
+        }
+
+        function updateCanvasDimensions() {
+            if (!currentImgSrc) return;
+
+            let finalRatio = selectedRatio;
+            if (selectedRatio === 'full') {
+                finalRatio = nativeWidth / nativeHeight;
+                ratioBadge.innerText = `Full (${nativeWidth}:${nativeHeight})`;
+            }
+
+            const viewportWidth = Math.min(window.innerWidth * 0.9, 650);
+            const viewportHeight = window.innerHeight * 0.55;
+
+            let targetWidth = viewportWidth;
+            let targetHeight = targetWidth / finalRatio;
+
+            if (targetHeight > viewportHeight) {
+                targetHeight = viewportHeight;
+                targetWidth = targetHeight * finalRatio;
+            }
+
+            canvasContainer.style.width = `${targetWidth}px`;
+            canvasContainer.style.height = `${targetHeight}px`;
+
+            if (backgroundType === 'blur') blurBg.style.opacity = '1';
+        }
+
+        colorPicker.addEventListener('input', (e) => {
+            chromaColor = e.target.value;
+            colorHex.value = chromaColor;
+            if (backgroundType === 'solid') solidBg.style.backgroundColor = chromaColor;
+        });
+
+        colorHex.addEventListener('input', (e) => {
+            if(e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                chromaColor = e.target.value;
+                colorPicker.value = chromaColor;
+                if (backgroundType === 'solid') solidBg.style.backgroundColor = chromaColor;
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!currentImgSrc) return;
+
+            const exportCanvas = document.createElement('canvas');
+            const ctx = exportCanvas.getContext('2d');
+
+            let finalRatio = selectedRatio;
+            if (selectedRatio === 'full') finalRatio = nativeWidth / nativeHeight;
+
+            let outWidth = nativeWidth;
+            let outHeight = nativeWidth / finalRatio;
+
+            if (outHeight < nativeHeight) {
+                outHeight = nativeHeight;
+                outWidth = outHeight * finalRatio;
+            }
+
+            exportCanvas.width = outWidth;
+            exportCanvas.height = outHeight;
+
+            const baseImg = new Image();
+            baseImg.onload = () => {
+                if (backgroundType === 'solid') {
+                    ctx.fillStyle = chromaColor;
+                    ctx.fillRect(0, 0, outWidth, outHeight);
+                    renderForegroundAsset();
+                } else {
+                    ctx.filter = 'blur(60px)';
+                    
+                    let bgWidth = outWidth;
+                    let bgHeight = (outWidth / nativeWidth) * nativeHeight;
+                    
+                    if (bgHeight < outHeight) {
+                        bgHeight = outHeight;
+                        bgWidth = (outHeight / nativeHeight) * nativeWidth;
+                    }
+                    
+                    const bgX = (outWidth - bgWidth) / 2;
+                    const bgY = (outHeight - bgHeight) / 2;
+                    
+                    ctx.drawImage(baseImg, bgX - 50, bgY - 50, bgWidth + 100, bgHeight + 100);
+                    ctx.filter = 'none';
+                    
+                    ctx.fillStyle = "rgba(0,0,0,0.15)";
+                    ctx.fillRect(0, 0, outWidth, outHeight);
+
+                    renderForegroundAsset();
+                }
+
+                function renderForegroundAsset() {
+                    let fgWidth = outWidth;
+                    let fgHeight = (outWidth / nativeWidth) * nativeHeight;
+
+                    if (fgHeight > outHeight) {
+                        fgHeight = outHeight;
+                        fgWidth = (outHeight / nativeHeight) * nativeWidth;
+                    }
+
+                    const fgX = (outWidth - fgWidth) / 2;
+                    const fgY = (outHeight - fgHeight) / 2;
+
+                    ctx.drawImage(baseImg, fgX, fgY, fgWidth, fgHeight);
+
+                    const link = document.createElement('a');
+                    link.download = `OmniFrame_${ratioMode.replace(':', '-')}_Asset.png`;
+                    link.href = exportCanvas.toDataURL('image/png', 1.0);
+                    link.click();
+                }
+     
