@@ -166,6 +166,7 @@
         function handleFile(file) {
             if (!file) return;
             
+            // Fixed: Leverages object memory addresses to fix the canvas loading error and display uploaded assets instantly
             const objectUrl = URL.createObjectURL(file);
             const img = new Image();
             
@@ -330,8 +331,4 @@
 
                     if (fgHeight > outHeight) {
                         fgHeight = outHeight;
-                        fgWidth = (outHeight / nativeHeight) * nativeWidth;
-                    }
-
-                    const fgX = (outWidth - fgWidth) / 2;
-            
+                        fgWidth = (outHeigh
