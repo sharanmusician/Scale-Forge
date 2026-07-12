@@ -46,7 +46,7 @@
             <input type="file" id="image-input" accept="image/*" class="hidden">
 
             <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10">
-                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 opacity-0 transition-opacity duration-300"></div>
+                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-0 transition-opacity duration-300"></div>
                 <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300"></div>
                 <img id="preview-img" src="" alt="Workspace Asset" class="absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300">
             </div>
@@ -151,10 +151,11 @@
         const blurValDisplay = document.getElementById('blur-val-display');
         const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
 
-        uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); uploadPlaceholder.classList.add('scale-95'); });
-        uploadPlaceholder.addEventListener('dragleave', () => { uploadPlaceholder.classList.remove('scale-95'); });
+        uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.add('scale-95'); });
+        uploadPlaceholder.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.remove('scale-95'); });
         uploadPlaceholder.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             uploadPlaceholder.classList.remove('scale-95');
             if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
@@ -166,7 +167,6 @@
         function handleFile(file) {
             if (!file) return;
             
-            // Fixed: Leverages object memory addresses to fix the canvas loading error and display uploaded assets instantly
             const objectUrl = URL.createObjectURL(file);
             const img = new Image();
             
@@ -331,4 +331,4 @@
 
                     if (fgHeight > outHeight) {
                         fgHeight = outHeight;
-                        fgWidth = (outHeigh
+                        fgWidth = (outHeight / nativeHeight) * n
