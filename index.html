@@ -45,10 +45,10 @@
 
             <input type="file" id="image-input" accept="image/*" class="hidden">
 
-            <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10">
-                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-0 transition-opacity duration-300"></div>
-                <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300"></div>
-                <img id="preview-img" src="" alt="Workspace Asset" class="absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300">
+            <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10 flex items-center justify-center">
+                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-100 transition-opacity duration-300 z-0"></div>
+                <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
+                <img id="preview-img" src="" alt="Workspace Asset" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
             </div>
         </section>
 
@@ -316,7 +316,6 @@
                     const bgX = (outWidth - bgWidth) / 2;
                     const bgY = (outHeight - bgHeight) / 2;
                     
-                    // Added visual padding calculation offset to match look perfectly
                     ctx.drawImage(baseImg, bgX - 55, bgY - 55, bgWidth + 110, bgHeight + 110);
                     ctx.filter = 'none';
                     
@@ -331,4 +330,5 @@
                     let fgHeight = (outWidth / nativeWidth) * nativeHeight;
 
                     if (fgHeight > outHeight) {
-                       
+                        fgHeight = outHeight;
+                     
