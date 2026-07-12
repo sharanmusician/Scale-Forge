@@ -46,7 +46,7 @@
             <input type="file" id="image-input" accept="image/*" class="hidden">
 
             <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10">
-                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-0 transition-opacity duration-300"></div>
+                <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 opacity-0 transition-opacity duration-300"></div>
                 <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300"></div>
                 <img id="preview-img" src="" alt="Workspace Asset" class="absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300">
             </div>
@@ -92,6 +92,14 @@
                     </button>
                 </div>
 
+                <div id="blur-intensity-wrapper" class="space-y-2 pt-1">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs text-gray-400 font-medium">Blur Intensity Control</label>
+                        <span id="blur-val-display" class="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">24px</span>
+                    </div>
+                    <input type="range" id="blur-slider" min="0" max="100" value="24" class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                </div>
+
                 <div id="color-picker-wrapper" class="hidden opacity-0 space-y-3 transition-all duration-300">
                     <label class="text-xs text-gray-400 font-medium">Engine Palette Chroma Picker</label>
                     <div class="flex items-center gap-3 bg-black/30 p-2.5 rounded-xl border border-white/5">
@@ -127,6 +135,7 @@
         let ratioMode = '1:1';
         let backgroundType = 'blur'; 
         let chromaColor = '#6366f1';
+        let blurRadius = 24;
 
         const imageInput = document.getElementById('image-input');
         const uploadPlaceholder = document.getElementById('upload-placeholder');
@@ -138,6 +147,9 @@
         const colorHex = document.getElementById('color-hex');
         const downloadBtn = document.getElementById('download-btn');
         const ratioBadge = document.getElementById('ratio-badge');
+        const blurSlider = document.getElementById('blur-slider');
+        const blurValDisplay = document.getElementById('blur-val-display');
+        const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
 
         uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); uploadPlaceholder.classList.add('scale-95'); });
         uploadPlaceholder.addEventListener('dragleave', () => { uploadPlaceholder.classList.remove('scale-95'); });
@@ -154,7 +166,6 @@
         function handleFile(file) {
             if (!file) return;
             
-            // Fixed: Replaced performance-heavy FileReader base64 execution with lightning fast memory allocation references
             const objectUrl = URL.createObjectURL(file);
             const img = new Image();
             
@@ -203,17 +214,25 @@
                 blurBtn.className = "bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
                 solidBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
                 pickerWrapper.classList.add('hidden', 'opacity-0');
+                blurIntensityWrapper.classList.remove('hidden');
                 blurBg.style.opacity = '1';
                 solidBg.style.backgroundColor = 'transparent';
             } else {
                 solidBtn.className = "bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
                 blurBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
                 pickerWrapper.classList.remove('hidden');
+                blurIntensityWrapper.classList.add('hidden');
                 setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
                 blurBg.style.opacity = '0';
                 solidBg.style.backgroundColor = chromaColor;
             }
         }
+
+        blurSlider.addEventListener('input', (e) => {
+            blurRadius = e.target.value;
+            blurValDisplay.innerText = `${blurRadius}px`;
+            blurBg.style.filter = `blur(${blurRadius}px)`;
+        });
 
         function updateCanvasDimensions() {
             if (!currentImgSrc) return;
@@ -238,6 +257,7 @@
             canvasContainer.style.width = `${targetWidth}px`;
             canvasContainer.style.height = `${targetHeight}px`;
 
+            blurBg.style.filter = `blur(${blurRadius}px)`;
             if (backgroundType === 'blur') blurBg.style.opacity = '1';
         }
 
@@ -282,7 +302,7 @@
                     ctx.fillRect(0, 0, outWidth, outHeight);
                     renderForegroundAsset();
                 } else {
-                    ctx.filter = 'blur(60px)';
+                    ctx.filter = `blur(${blurRadius}px)`;
                     
                     let bgWidth = outWidth;
                     let bgHeight = (outWidth / nativeWidth) * nativeHeight;
@@ -295,7 +315,7 @@
                     const bgX = (outWidth - bgWidth) / 2;
                     const bgY = (outHeight - bgHeight) / 2;
                     
-                    ctx.drawImage(baseImg, bgX - 50, bgY - 50, bgWidth + 100, bgHeight + 100);
+                    ctx.drawImage(baseImg, bgX - 55, bgY - 55, bgWidth + 110, bgHeight + 110);
                     ctx.filter = 'none';
                     
                     ctx.fillStyle = "rgba(0,0,0,0.15)";
@@ -314,20 +334,4 @@
                     }
 
                     const fgX = (outWidth - fgWidth) / 2;
-                    const fgY = (outHeight - fgHeight) / 2;
-
-                    ctx.drawImage(baseImg, fgX, fgY, fgWidth, fgHeight);
-
-                    const link = document.createElement('a');
-                    link.download = `ScaleForge_${ratioMode.replace(':', '-')}_Asset.png`;
-                    link.href = exportCanvas.toDataURL('image/png', 1.0);
-                    link.click();
-                }
-            };
-            baseImg.src = currentImgSrc;
-        });
-
-        window.addEventListener('resize', updateCanvasDimensions);
-    </script>
-</body>
-</html>
+            
