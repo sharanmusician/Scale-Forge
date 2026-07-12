@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniFrame Pro | Enterprise Image Framing Engine</title>
-    <!-- Tailwind CSS for premium styling -->
+    <title>Scale Forge | Enterprise Image Framing Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for luxury typography -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
@@ -19,28 +17,24 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-indigo-500/30">
 
-    <!-- Premium Header -->
     <header class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
         <div class="flex items-center space-x-3">
             <div class="h-9 w-9 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <span class="text-white font-black text-xs tracking-wider">OF</span>
+                <span class="text-white font-black text-xs tracking-wider">SF</span>
             </div>
             <div>
-                <span class="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">OmniFrame Pro</span>
+                <span class="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">Scale Forge</span>
                 <span class="text-xs block text-indigo-400 font-medium tracking-widest uppercase -mt-1">By Aethercore Interactive</span>
             </div>
         </div>
         <span class="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400 hidden sm:inline-block">v2.4 Pro Engine</span>
     </header>
 
-    <!-- Main Workspace -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- Left Column: Live Canvas Preview Area -->
         <section class="lg:col-span-7 xl:col-span-8 w-full flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] bg-black/40 rounded-3xl border border-white/5 p-4 relative overflow-hidden group">
             <div class="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
             
-            <!-- Upload Trigger Area -->
             <div id="upload-placeholder" class="z-10 text-center p-6 cursor-pointer max-w-sm transition-transform duration-300 hover:scale-105" onclick="document.getElementById('image-input').click()">
                 <div class="mx-auto h-16 w-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
                     <svg class="w-8 h-8 text-gray-400 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -51,21 +45,15 @@
 
             <input type="file" id="image-input" accept="image/*" class="hidden">
 
-            <!-- Interactive intelligent Studio Canvas Frame -->
             <div id="canvas-container" class="hidden relative shadow-2xl transition-all duration-300 max-w-full max-h-[70vh] overflow-hidden rounded-xl border border-white/10">
-                <!-- Dynamic Blurred Background -->
                 <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-0 transition-opacity duration-300"></div>
-                <!-- Dynamic Solid Background -->
                 <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300"></div>
-                <!-- Foreground Main Image -->
                 <img id="preview-img" src="" alt="Workspace Asset" class="absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300">
             </div>
         </section>
 
-        <!-- Right Column: Micro-Console Controls Panel -->
         <section class="lg:col-span-5 xl:col-span-4 space-y-6 w-full">
             
-            <!-- Aspect Ratios Section -->
             <div class="glass p-6 rounded-2xl space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">1. Aspect Ratios</h2>
@@ -90,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- Background FX Section -->
             <div class="glass p-6 rounded-2xl space-y-4">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">2. FX & Canvas Background</h2>
                 
@@ -105,7 +92,6 @@
                     </button>
                 </div>
 
-                <!-- Color Palette Picker -->
                 <div id="color-picker-wrapper" class="hidden opacity-0 space-y-3 transition-all duration-300">
                     <label class="text-xs text-gray-400 font-medium">Engine Palette Chroma Picker</label>
                     <div class="flex items-center gap-3 bg-black/30 p-2.5 rounded-xl border border-white/5">
@@ -119,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Master Pipeline Controls -->
             <div class="space-y-3">
                 <button id="download-btn" disabled class="w-full glow-button bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg opacity-50 cursor-not-allowed text-sm uppercase tracking-wider">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -130,12 +115,10 @@
         </section>
     </main>
 
-    <!-- Footer Studio Info -->
     <footer class="border-t border-white/5 px-6 py-4 text-center text-xs text-gray-500 font-mono">
-        &copy; 2026 Aethercore Interactive. All Rights Reserved. Powered by OmniFrame Processing Engines.
+        &copy; 2026 Aethercore Interactive. All Rights Reserved. Powered by Scale Forge Processing Engines.
     </footer>
 
-    <!-- Core Canvas Logic Script Engine -->
     <script>
         let currentImgSrc = '';
         let nativeWidth = 0;
@@ -169,27 +152,28 @@
         });
 
         function handleFile(file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    nativeWidth = img.width;
-                    nativeHeight = img.height;
-                    currentImgSrc = event.target.result;
-                    
-                    uploadPlaceholder.classList.add('hidden');
-                    canvasContainer.classList.remove('hidden');
-                    downloadBtn.removeAttribute('disabled');
-                    downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if (!file) return;
+            
+            // Fixed: Replaced performance-heavy FileReader base64 execution with lightning fast memory allocation references
+            const objectUrl = URL.createObjectURL(file);
+            const img = new Image();
+            
+            img.onload = () => {
+                nativeWidth = img.width;
+                nativeHeight = img.height;
+                currentImgSrc = objectUrl;
+                
+                uploadPlaceholder.classList.add('hidden');
+                canvasContainer.classList.remove('hidden');
+                downloadBtn.removeAttribute('disabled');
+                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-                    previewImg.src = currentImgSrc;
-                    blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
-                    
-                    updateCanvasDimensions();
-                };
-                img.src = event.target.result;
+                previewImg.src = currentImgSrc;
+                blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+                
+                updateCanvasDimensions();
             };
-            reader.readAsDataURL(file);
+            img.src = objectUrl;
         }
 
         function setRatio(label, targetVal) {
@@ -335,8 +319,15 @@
                     ctx.drawImage(baseImg, fgX, fgY, fgWidth, fgHeight);
 
                     const link = document.createElement('a');
-                    link.download = `OmniFrame_${ratioMode.replace(':', '-')}_Asset.png`;
+                    link.download = `ScaleForge_${ratioMode.replace(':', '-')}_Asset.png`;
                     link.href = exportCanvas.toDataURL('image/png', 1.0);
                     link.click();
                 }
-     
+            };
+            baseImg.src = currentImgSrc;
+        });
+
+        window.addEventListener('resize', updateCanvasDimensions);
+    </script>
+</body>
+</html>
