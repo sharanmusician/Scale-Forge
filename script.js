@@ -31,7 +31,7 @@ const opacityMinus = document.getElementById('opacity-minus');
 const opacityPlus = document.getElementById('opacity-plus');
 const colorPreviewPatch = document.getElementById('color-preview-patch');
 
-const miniPreviewContainerWrapper = document.getElementById('mini-preview-container-wrapper');
+const miniPlaceholder = document.getElementById('mini-placeholder');
 const miniPreviewContainer = document.getElementById('mini-preview-container');
 const miniPreviewImg = document.getElementById('mini-preview-img');
 const miniBlurBg = document.getElementById('mini-blur-bg');
@@ -67,9 +67,9 @@ function handleFile(file) {
             
             uploadPlaceholder.classList.add('hidden');
             canvasContainer.classList.remove('hidden');
-            miniPreviewContainerWrapper.classList.remove('hidden');
-            downloadBtn.removeAttribute('disabled');
-            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            if (miniPlaceholder) miniPlaceholder.classList.add('hidden');
+            miniPreviewImg.classList.remove('hidden');
 
             previewImg.src = currentImgSrc;
             miniPreviewImg.src = currentImgSrc;
@@ -114,7 +114,7 @@ function setBgType(type) {
         blurIntensityWrapper.classList.remove('hidden');
         
         blurBg.style.opacity = '1';
-        miniBlurBg.style.opacity = '1';
+        if (currentImgSrc) miniBlurBg.style.opacity = '1';
         solidBg.style.backgroundColor = 'transparent';
         miniSolidBg.style.backgroundColor = 'transparent';
     } else {
@@ -368,7 +368,6 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Mirror dimensions to mini preview window context
     const miniMaxHeight = 144;
     let miniWidth = 240; 
     let miniHeight = miniWidth / finalRatio;
@@ -455,4 +454,3 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-    
