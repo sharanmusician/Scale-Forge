@@ -5,6 +5,7 @@ let selectedRatio = 1;
 let ratioMode = '1:1';
 let backgroundType = 'blur'; 
 let chromaColor = '#6366f1';
+let chromaOpacity = 1;
 let blurRadius = 24;
 
 const imageInput = document.getElementById('image-input');
@@ -13,7 +14,6 @@ const canvasContainer = document.getElementById('canvas-container');
 const previewImg = document.getElementById('preview-img');
 const blurBg = document.getElementById('blur-bg');
 const solidBg = document.getElementById('solid-bg');
-const colorPicker = document.getElementById('color-picker');
 const colorHex = document.getElementById('color-hex');
 const downloadBtn = document.getElementById('download-btn');
 const ratioBadge = document.getElementById('ratio-badge');
@@ -22,6 +22,16 @@ const blurValDisplay = document.getElementById('blur-val-display');
 const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
 const blurMinus = document.getElementById('blur-minus');
 const blurPlus = document.getElementById('blur-plus');
+
+const wheelCanvas = document.getElementById('wheel-canvas');
+const wheelCursor = document.getElementById('wheel-cursor');
+const opacitySlider = document.getElementById('opacity-slider');
+const opacityVal = document.getElementById('opacity-val');
+const colorPreviewPatch = document.getElementById('color-preview-patch');
+
+let currentHue = 239;
+let currentSaturation = 80;
+let currentLightness = 66; 
 
 uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.add('scale-95'); });
 uploadPlaceholder.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.remove('scale-95'); });
@@ -99,7 +109,9 @@ function setBgType(type) {
         blurIntensityWrapper.classList.add('hidden');
         setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
         blurBg.style.opacity = '0';
-        solidBg.style.backgroundColor = chromaColor;
+        drawColorWheel();
+        updateCursorPosition();
+        updateChromaBackground();
     }
 }
 
@@ -123,6 +135,148 @@ blurPlus.addEventListener('click', () => {
     blurRadius = newVal;
     blurValDisplay.innerText = `${blurRadius}px`;
     blurBg.style.filter = `blur(${blurRadius}px)`;
+});
+
+function drawColorWheel() {
+    const ctx = wheelCanvas.getContext('2d');
+    const width = wheelCanvas.width;
+    const height = wheelCanvas.height;
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = width / 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const dx = x - cx;
+            const dy = y - cy;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance <= radius) {
+                let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                if (angle < 0) angle += 360;
+
+                const saturation = (distance / radius) * 100;
+                ctx.fillStyle = `hsl(${angle}, ${saturation}%, 50%)`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
+    }
+}
+
+function handleWheelSelection(e) {
+    const rect = wheelCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = wheelCanvas.width / 2;
+    const cy = wheelCanvas.height / 2;
+    const dx = x - cx;
+    const dy = y - cy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const radius = wheelCanvas.width / 2;
+
+    if (distance <= radius) {
+        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        if (angle < 0) angle += 360;
+
+        currentHue = angle;
+        currentSaturation = (distance / radius) * 100;
+        
+        wheelCursor.style.left = `${x}px` ;
+        wheelCursor.style.top = `${y}px`;
+
+        updateColorOutputs();
+    }
+}
+
+function updateCursorPosition() {
+    const cx = wheelCanvas.width / 2;
+    const cy = wheelCanvas.height / 2;
+    const radius = wheelCanvas.width / 2;
+    const angleRad = currentHue * (Math.PI / 180);
+    const distance = (currentSaturation / 100) * radius;
+
+    const x = cx + Math.cos(angleRad) * distance;
+    const y = cy + Math.sin(angleRad) * distance;
+
+    wheelCursor.style.left = `${x}px`;
+    wheelCursor.style.top = `${y}px`;
+}
+
+wheelCanvas.addEventListener('mousedown', (e) => {
+    handleWheelSelection(e);
+    const onMouseMove = (moveEvent) => handleWheelSelection(moveEvent);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', () => {
+        window.removeEventListener('mousemove', onMouseMove);
+    }, { once: true });
+});
+
+opacitySlider.addEventListener('input', (e) => {
+    chromaOpacity = e.target.value / 100;
+    opacityVal.innerText = `${e.target.value}%`;
+    updateChromaBackground();
+});
+
+function updateColorOutputs() {
+    const tempElement = document.createElement('div');
+    tempElement.style.color = `hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`;
+    document.body.appendChild(tempElement);
+    const rgbString = window.getComputedStyle(tempElement).color;
+    document.body.removeChild(tempElement);
+
+    const rgbArr = rgbString.match(/\d+/g).map(Number);
+    const hex = "#" + rgbArr.map(x => {
+        const hexStr = x.toString(16);
+        return hexStr.length === 1 ? '0' + hexStr : hexStr;
+    }).join('');
+
+    chromaColor = hex;
+    colorHex.value = chromaColor;
+    updateChromaBackground();
+}
+
+function updateChromaBackground() {
+    const r = parseInt(chromaColor.slice(1, 3), 16);
+    const g = parseInt(chromaColor.slice(3, 5), 16);
+    const b = parseInt(chromaColor.slice(5, 7), 16);
+    const rgbaColor = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
+
+    colorPreviewPatch.style.backgroundColor = rgbaColor;
+    if (backgroundType === 'solid') solidBg.style.backgroundColor = rgbaColor;
+}
+
+colorHex.addEventListener('input', (e) => {
+    if(e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+        chromaColor = e.target.value;
+        
+        const r = parseInt(chromaColor.slice(1, 3), 16) / 255;
+        const g = parseInt(chromaColor.slice(3, 5), 16) / 255;
+        const b = parseInt(chromaColor.slice(5, 7), 16) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+
+        if (max === min) {
+            h = s = 0;
+        } else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        
+        currentHue = h * 360;
+        currentSaturation = s * 100;
+        currentLightness = l * 100;
+
+        updateCursorPosition();
+        updateChromaBackground();
+    }
 });
 
 function updateCanvasDimensions() {
@@ -152,20 +306,6 @@ function updateCanvasDimensions() {
     if (backgroundType === 'blur') blurBg.style.opacity = '1';
 }
 
-colorPicker.addEventListener('input', (e) => {
-    chromaColor = e.target.value;
-    colorHex.value = chromaColor;
-    if (backgroundType === 'solid') solidBg.style.backgroundColor = chromaColor;
-});
-
-colorHex.addEventListener('input', (e) => {
-    if(e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-        chromaColor = e.target.value;
-        colorPicker.value = chromaColor;
-        if (backgroundType === 'solid') solidBg.style.backgroundColor = chromaColor;
-    }
-});
-
 downloadBtn.addEventListener('click', () => {
     if (!currentImgSrc) return;
 
@@ -189,7 +329,10 @@ downloadBtn.addEventListener('click', () => {
     const baseImg = new Image();
     baseImg.onload = () => {
         if (backgroundType === 'solid') {
-            ctx.fillStyle = chromaColor;
+            const r = parseInt(chromaColor.slice(1, 3), 16);
+            const g = parseInt(chromaColor.slice(3, 5), 16);
+            const b = parseInt(chromaColor.slice(5, 7), 16);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
             ctx.fillRect(0, 0, outWidth, outHeight);
             renderForegroundAsset();
         } else {
