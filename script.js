@@ -55,7 +55,6 @@ imageInput.addEventListener('change', (e) => {
     if (e.target.files.length) handleFile(e.target.files[0]);
 });
 
-// Single Unified Professional Replacement Button Action Mapping
 replacePhotoBtn.addEventListener('click', (e) => {
     e.preventDefault();
     imageInput.click();
@@ -79,7 +78,6 @@ function handleFile(file) {
             miniPreviewImg.classList.remove('hidden');
             replacePhotoBtn.classList.remove('hidden');
 
-            // Strip interface blocks and switch execution metrics
             downloadBtn.removeAttribute('disabled');
             downloadBtn.disabled = false;
             downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -92,7 +90,6 @@ function handleFile(file) {
             updateCanvasDimensions();
             updateChromaBackground();
 
-            // Clear hardware file input value strings safely
             imageInput.value = '';
         };
         img.src = event.target.result;
@@ -106,9 +103,10 @@ function setRatio(label, targetVal) {
     ratioBadge.innerText = label;
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
-        btn.className = "ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
+        // VN Style Adaptive layout reset for precise shapes
+        btn.className = "ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-2.5 rounded-xl flex items-center gap-3.5 text-xs font-medium transition-all text-left";
         if(btn.innerText.includes(label)) {
-            btn.className = "ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
+            btn.className = "ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-2.5 rounded-xl flex items-center gap-3.5 text-xs font-medium transition-all text-left";
         }
     });
 
@@ -251,7 +249,6 @@ function updateCursorPosition() {
     wheelCursor.style.top = `${y}px`;
 }
 
-wheelCanvas.getContext('2d');
 wheelCanvas.addEventListener('mousedown', (e) => {
     handleWheelSelection(e.clientX, e.clientY);
     const onMouseMove = (moveEvent) => handleWheelSelection(moveEvent.clientX, moveEvent.clientY);
@@ -470,3 +467,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
+                
