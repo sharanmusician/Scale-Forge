@@ -20,6 +20,8 @@ const ratioBadge = document.getElementById('ratio-badge');
 const blurSlider = document.getElementById('blur-slider');
 const blurValDisplay = document.getElementById('blur-val-display');
 const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
+const blurMinus = document.getElementById('blur-minus');
+const blurPlus = document.getElementById('blur-plus');
 
 uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.add('scale-95'); });
 uploadPlaceholder.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.remove('scale-95'); });
@@ -103,6 +105,22 @@ function setBgType(type) {
 
 blurSlider.addEventListener('input', (e) => {
     blurRadius = e.target.value;
+    blurValDisplay.innerText = `${blurRadius}px`;
+    blurBg.style.filter = `blur(${blurRadius}px)`;
+});
+
+blurMinus.addEventListener('click', () => {
+    let newVal = Math.max(0, parseInt(blurSlider.value) - 1);
+    blurSlider.value = newVal;
+    blurRadius = newVal;
+    blurValDisplay.innerText = `${blurRadius}px`;
+    blurBg.style.filter = `blur(${blurRadius}px)`;
+});
+
+blurPlus.addEventListener('click', () => {
+    let newVal = Math.min(100, parseInt(blurSlider.value) + 1);
+    blurSlider.value = newVal;
+    blurRadius = newVal;
     blurValDisplay.innerText = `${blurRadius}px`;
     blurBg.style.filter = `blur(${blurRadius}px)`;
 });
@@ -210,4 +228,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-       
+        
