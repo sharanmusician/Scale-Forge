@@ -368,6 +368,7 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
+    // Dynamic scale layout override for the mini picture-in-picture session window
     const miniMaxHeight = 144;
     let miniWidth = 240; 
     let miniHeight = miniWidth / finalRatio;
