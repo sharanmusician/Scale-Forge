@@ -29,6 +29,9 @@ const opacitySlider = document.getElementById('opacity-slider');
 const opacityVal = document.getElementById('opacity-val');
 const colorPreviewPatch = document.getElementById('color-preview-patch');
 
+const miniPreviewImg = document.getElementById('mini-preview-img');
+const miniSolidBg = document.getElementById('mini-solid-bg');
+
 let currentHue = 239;
 let currentSaturation = 80;
 let currentLightness = 66; 
@@ -63,6 +66,7 @@ function handleFile(file) {
             downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             previewImg.src = currentImgSrc;
+            miniPreviewImg.src = currentImgSrc;
             blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
             
             updateCanvasDimensions();
@@ -273,6 +277,7 @@ function updateChromaBackground() {
     colorPreviewPatch.style.backgroundColor = rgbaColor;
     if (backgroundType === 'solid') {
         solidBg.style.backgroundColor = rgbaColor;
+        miniSolidBg.style.backgroundColor = rgbaColor;
     }
 }
 
@@ -400,4 +405,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-                               
+                
