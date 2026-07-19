@@ -27,8 +27,11 @@ const wheelCanvas = document.getElementById('wheel-canvas');
 const wheelCursor = document.getElementById('wheel-cursor');
 const opacitySlider = document.getElementById('opacity-slider');
 const opacityVal = document.getElementById('opacity-val');
+const opacityMinus = document.getElementById('opacity-minus');
+const opacityPlus = document.getElementById('opacity-plus');
 const colorPreviewPatch = document.getElementById('color-preview-patch');
 
+const miniPreviewContainerWrapper = document.getElementById('mini-preview-container-wrapper');
 const miniPreviewContainer = document.getElementById('mini-preview-container');
 const miniPreviewImg = document.getElementById('mini-preview-img');
 const miniBlurBg = document.getElementById('mini-blur-bg');
@@ -64,6 +67,7 @@ function handleFile(file) {
             
             uploadPlaceholder.classList.add('hidden');
             canvasContainer.classList.remove('hidden');
+            miniPreviewContainerWrapper.classList.remove('hidden');
             downloadBtn.removeAttribute('disabled');
             downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -73,6 +77,7 @@ function handleFile(file) {
             miniBlurBg.style.backgroundImage = `url('${currentImgSrc}')`;
             
             updateCanvasDimensions();
+            updateChromaBackground();
         };
         img.src = event.target.result;
     };
@@ -107,6 +112,7 @@ function setBgType(type) {
         solidBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
         pickerWrapper.classList.add('hidden', 'opacity-0');
         blurIntensityWrapper.classList.remove('hidden');
+        
         blurBg.style.opacity = '1';
         miniBlurBg.style.opacity = '1';
         solidBg.style.backgroundColor = 'transparent';
@@ -117,6 +123,7 @@ function setBgType(type) {
         pickerWrapper.classList.remove('hidden');
         blurIntensityWrapper.classList.add('hidden');
         setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
+        
         blurBg.style.opacity = '0';
         miniBlurBg.style.opacity = '0';
         drawColorWheel();
@@ -259,6 +266,22 @@ opacitySlider.addEventListener('input', (e) => {
     updateChromaBackground();
 });
 
+opacityMinus.addEventListener('click', () => {
+    let newVal = Math.max(0, parseInt(opacitySlider.value) - 1);
+    opacitySlider.value = newVal;
+    chromaOpacity = newVal / 100;
+    opacityVal.innerText = `${newVal}%`;
+    updateChromaBackground();
+});
+
+opacityPlus.addEventListener('click', () => {
+    let newVal = Math.min(100, parseInt(opacitySlider.value) + 1);
+    opacitySlider.value = newVal;
+    chromaOpacity = newVal / 100;
+    opacityVal.innerText = `${newVal}%`;
+    updateChromaBackground();
+});
+
 function updateColorOutputs() {
     const tempElement = document.createElement('div');
     tempElement.style.color = `hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`;
@@ -345,8 +368,8 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Mirror matching dimensions to mini preview
-    const miniMaxHeight = 144; // fixed container limit
+    // Mirror dimensions to mini preview window context
+    const miniMaxHeight = 144;
     let miniWidth = 240; 
     let miniHeight = miniWidth / finalRatio;
 
@@ -432,4 +455,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-                       
+    
