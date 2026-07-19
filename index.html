@@ -72,7 +72,14 @@
             </div>
 
             <div class="glass p-6 rounded-2xl space-y-4">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">2. FX & Canvas Background</h2>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400">2. FX & Canvas Background</h2>
+                    <!-- Replace Asset Control Trigger Button -->
+                    <button id="replace-photo-btn" class="hidden text-xs text-gray-400 hover:text-indigo-400 font-medium flex items-center gap-1 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
+                        Replace Asset
+                    </button>
+                </div>
                 
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="setBgType('blur')" id="bg-blur-btn" class="bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all">
@@ -157,4 +164,5 @@
 
     <script src="script.js"></script>
 </body>
-</html>
+                        </html>
+                        
