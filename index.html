@@ -101,6 +101,13 @@
                     <label class="text-xs text-gray-400 font-medium">Engine Palette Chroma Wheel</label>
                     
                     <div class="flex flex-col items-center justify-center p-4 bg-black/30 rounded-xl border border-white/5 space-y-4">
+                        
+                        <!-- Mini Preview Window Block -->
+                        <div id="mini-preview-container" class="w-full h-24 relative overflow-hidden rounded-lg border border-white/10 flex items-center justify-center bg-black/20">
+                            <div id="mini-solid-bg" class="absolute inset-0 transition-colors duration-200"></div>
+                            <img id="mini-preview-img" src="" alt="Mini Preview" class="max-w-full max-h-full object-contain z-10 relative">
+                        </div>
+
                         <div class="relative w-44 h-44 flex items-center justify-center">
                             <canvas id="wheel-canvas" width="176" height="176" class="cursor-crosshair rounded-full border border-white/10"></canvas>
                             <div id="wheel-cursor" class="absolute w-4 h-4 border-2 border-white rounded-full shadow-md pointer-events-none transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
