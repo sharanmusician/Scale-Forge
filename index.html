@@ -85,6 +85,15 @@
                     </button>
                 </div>
 
+                <!-- Shared Mini Preview Window Block -->
+                <div id="mini-preview-container-wrapper" class="hidden pt-1 flex justify-center w-full">
+                    <div id="mini-preview-container" class="relative overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black/40 transition-all duration-300">
+                        <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-300 z-0"></div>
+                        <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
+                        <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
+                    </div>
+                </div>
+
                 <div id="blur-intensity-wrapper" class="space-y-2 pt-1">
                     <div class="flex justify-between items-center">
                         <label class="text-xs text-gray-400 font-medium">Blur Intensity Control</label>
@@ -101,14 +110,6 @@
                     <label class="text-xs text-gray-400 font-medium">Engine Palette Chroma Wheel</label>
                     
                     <div class="flex flex-col items-center justify-center p-4 bg-black/30 rounded-xl border border-white/5 space-y-4">
-                        
-                        <!-- Mini Preview Exact Duplicate Canvas Wrapper Block -->
-                        <div id="mini-preview-container" class="w-full h-36 relative overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black/40 transition-all duration-300">
-                            <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-300 z-0"></div>
-                            <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
-                            <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
-                        </div>
-
                         <div class="relative w-44 h-44 flex items-center justify-center">
                             <canvas id="wheel-canvas" width="176" height="176" class="cursor-crosshair rounded-full border border-white/10"></canvas>
                             <div id="wheel-cursor" class="absolute w-4 h-4 border-2 border-white rounded-full shadow-md pointer-events-none transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
@@ -119,7 +120,11 @@
                                 <label class="text-[11px] text-gray-400 font-medium">Chroma Opacity</label>
                                 <span id="opacity-val" class="text-[11px] font-mono text-indigo-400">100%</span>
                             </div>
-                            <input type="range" id="opacity-slider" min="0" max="100" value="100" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <div class="flex items-center gap-3">
+                                <button type="button" id="opacity-minus" class="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white rounded-lg transition-all font-bold text-sm select-none">-</button>
+                                <input type="range" id="opacity-slider" min="0" max="100" value="100" class="flex-grow h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                                <button type="button" id="opacity-plus" class="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white rounded-lg transition-all font-bold text-sm select-none">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -148,5 +153,4 @@
 
     <script src="script.js"></script>
 </body>
-                                </html>
-                                
+</html>
