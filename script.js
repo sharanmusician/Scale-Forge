@@ -77,6 +77,10 @@ function handleFile(file) {
             miniPreviewImg.classList.remove('hidden');
             replacePhotoBtn.classList.remove('hidden');
 
+            // Wake up download button capabilities
+            downloadBtn.removeAttribute('disabled');
+            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
             previewImg.src = currentImgSrc;
             miniPreviewImg.src = currentImgSrc;
             blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
@@ -460,4 +464,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-        
+                
