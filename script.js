@@ -167,8 +167,9 @@ function drawColorWheel() {
 
 function handleWheelSelection(clientX, clientY) {
     const rect = wheelCanvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
+    let x = clientX - rect.left;
+    let y = clientY - rect.top;
+    
     const cx = wheelCanvas.width / 2;
     const cy = wheelCanvas.height / 2;
     const dx = x - cx;
@@ -185,9 +186,21 @@ function handleWheelSelection(clientX, clientY) {
         
         wheelCursor.style.left = `${x}px` ;
         wheelCursor.style.top = `${y}px`;
-
-        updateColorOutputs();
+    } else {
+        let angle = Math.atan2(dy, dx);
+        x = cx + Math.cos(angle) * radius;
+        y = cy + Math.sin(angle) * radius;
+        
+        let angleDeg = angle * (180 / Math.PI);
+        if (angleDeg < 0) angleDeg += 360;
+        
+        currentHue = angleDeg;
+        currentSaturation = 100;
+        
+        wheelCursor.style.left = `${x}px`;
+        wheelCursor.style.top = `${y}px`;
     }
+    updateColorOutputs();
 }
 
 function updateCursorPosition() {
@@ -214,20 +227,17 @@ wheelCanvas.addEventListener('mousedown', (e) => {
 });
 
 wheelCanvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     if (e.touches.length === 1) {
-        e.preventDefault();
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
-    const onTouchMove = (moveEvent) => {
-        if (moveEvent.touches.length === 1) {
-            moveEvent.preventDefault();
-            handleWheelSelection(moveEvent.touches[0].clientX, moveEvent.touches[0].clientY);
-        }
-    };
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('touchend', () => {
-        window.removeEventListener('touchmove', onTouchMove);
-    }, { once: true });
+}, { passive: false });
+
+wheelCanvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+        handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
+    }
 }, { passive: false });
 
 opacitySlider.addEventListener('input', (e) => {
@@ -390,4 +400,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-    
+                               
