@@ -22,6 +22,7 @@ const blurValDisplay = document.getElementById('blur-val-display');
 const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
 const blurMinus = document.getElementById('blur-minus');
 const blurPlus = document.getElementById('blur-plus');
+const replacePhotoBtn = document.getElementById('replace-photo-btn');
 
 const wheelCanvas = document.getElementById('wheel-canvas');
 const wheelCursor = document.getElementById('wheel-cursor');
@@ -54,6 +55,10 @@ imageInput.addEventListener('change', (e) => {
     if (e.target.files.length) handleFile(e.target.files[0]);
 });
 
+replacePhotoBtn.addEventListener('click', () => {
+    imageInput.click();
+});
+
 function handleFile(file) {
     if (!file) return;
     
@@ -70,6 +75,7 @@ function handleFile(file) {
             
             if (miniPlaceholder) miniPlaceholder.classList.add('hidden');
             miniPreviewImg.classList.remove('hidden');
+            replacePhotoBtn.classList.remove('hidden');
 
             previewImg.src = currentImgSrc;
             miniPreviewImg.src = currentImgSrc;
@@ -368,7 +374,6 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Dynamic scale layout override for the mini picture-in-picture session window
     const miniMaxHeight = 144;
     let miniWidth = 240; 
     let miniHeight = miniWidth / finalRatio;
@@ -455,3 +460,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
+        
