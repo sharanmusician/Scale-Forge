@@ -102,10 +102,11 @@
                     
                     <div class="flex flex-col items-center justify-center p-4 bg-black/30 rounded-xl border border-white/5 space-y-4">
                         
-                        <!-- Mini Preview Window Block -->
-                        <div id="mini-preview-container" class="w-full h-24 relative overflow-hidden rounded-lg border border-white/10 flex items-center justify-center bg-black/20">
-                            <div id="mini-solid-bg" class="absolute inset-0 transition-colors duration-200"></div>
-                            <img id="mini-preview-img" src="" alt="Mini Preview" class="max-w-full h-full object-contain z-10 relative">
+                        <!-- Mini Preview Exact Duplicate Canvas Wrapper Block -->
+                        <div id="mini-preview-container" class="w-full h-36 relative overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black/40 transition-all duration-300">
+                            <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-300 z-0"></div>
+                            <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
+                            <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
                         </div>
 
                         <div class="relative w-44 h-44 flex items-center justify-center">
@@ -147,4 +148,5 @@
 
     <script src="script.js"></script>
 </body>
-</html>
+                                </html>
+                                
