@@ -165,10 +165,10 @@ function drawColorWheel() {
     }
 }
 
-function handleWheelSelection(e) {
+function handleWheelSelection(clientX, clientY) {
     const rect = wheelCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     const cx = wheelCanvas.width / 2;
     const cy = wheelCanvas.height / 2;
     const dx = x - cx;
@@ -205,13 +205,30 @@ function updateCursorPosition() {
 }
 
 wheelCanvas.addEventListener('mousedown', (e) => {
-    handleWheelSelection(e);
-    const onMouseMove = (moveEvent) => handleWheelSelection(moveEvent);
+    handleWheelSelection(e.clientX, e.clientY);
+    const onMouseMove = (moveEvent) => handleWheelSelection(moveEvent.clientX, moveEvent.clientY);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', () => {
         window.removeEventListener('mousemove', onMouseMove);
     }, { once: true });
 });
+
+wheelCanvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        e.preventDefault();
+        handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
+    }
+    const onTouchMove = (moveEvent) => {
+        if (moveEvent.touches.length === 1) {
+            moveEvent.preventDefault();
+            handleWheelSelection(moveEvent.touches[0].clientX, moveEvent.touches[0].clientY);
+        }
+    };
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', () => {
+        window.removeEventListener('touchmove', onTouchMove);
+    }, { once: true });
+}, { passive: false });
 
 opacitySlider.addEventListener('input', (e) => {
     chromaOpacity = e.target.value / 100;
@@ -373,4 +390,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-        
+    
