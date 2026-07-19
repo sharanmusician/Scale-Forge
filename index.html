@@ -2,61 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scale Forge | Studio Editing Suite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scale Forge | Mobile Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Force no scrolling and ensure touch-friendly UI */
+        body { touch-action: manipulation; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body class="h-screen w-screen bg-[#0b0b0d] text-gray-200 flex flex-col overflow-hidden font-sans">
 
-    <!-- Top Navigation -->
-    <header class="h-10 border-b border-white/[0.05] flex items-center px-4 justify-between flex-shrink-0">
-        <span class="font-bold text-[10px] tracking-widest text-indigo-400">SCALE FORGE // STUDIO_V2</span>
-        <button id="replace-photo-btn" class="hidden text-[9px] bg-white/[0.05] px-3 py-1 rounded">IMPORT MEDIA</button>
+    <!-- Top Toolbar (Project Name + Import) -->
+    <header class="h-12 border-b border-white/[0.05] flex items-center px-4 justify-between bg-[#0b0b0d]">
+        <span class="text-[10px] font-bold text-indigo-400 tracking-widest">SCALE FORGE // EDITOR</span>
+        <button id="replace-photo-btn" class="hidden text-[9px] bg-white/[0.05] border border-white/[0.1] px-3 py-1 rounded">IMPORT</button>
     </header>
 
-    <!-- Main Workspace -->
-    <main class="flex-grow flex overflow-hidden">
-        
-        <!-- Center Monitor -->
-        <section class="flex-grow bg-black/40 flex items-center justify-center p-4">
-            <div id="upload-placeholder" class="text-center cursor-pointer" onclick="document.getElementById('image-input').click()">
-                <div class="text-[10px] text-gray-500">CLICK TO IMPORT</div>
-            </div>
-            <div id="canvas-container" class="hidden relative max-h-full max-w-full">
-                <div id="blur-bg" class="absolute inset-0 blur-xl"></div>
-                <div id="solid-bg" class="absolute inset-0"></div>
-                <img id="preview-img" class="max-h-[70vh] w-auto relative z-10">
-            </div>
-            <input type="file" id="image-input" accept="image/*" class="hidden">
-        </section>
-
-        <!-- Right Inspector -->
-        <aside class="w-64 border-l border-white/[0.05] bg-[#111114] flex flex-col p-4 gap-4 flex-shrink-0">
-            <div class="grid grid-cols-2 gap-1">
-                <button onclick="setRatio('1:1', 1)" class="ratio-btn text-[9px] p-2 bg-white/[0.03] rounded">1:1</button>
-                <button onclick="setRatio('16:9', 16/9)" class="ratio-btn text-[9px] p-2 bg-white/[0.03] rounded">16:9</button>
-            </div>
-            <div id="blur-intensity-wrapper" class="flex flex-col gap-2">
-                <label class="text-[9px] text-gray-500">BLUR INTENSITY</label>
-                <input type="range" id="blur-slider" min="0" max="100" value="24" class="accent-indigo-500">
-            </div>
-            <div id="color-picker-wrapper" class="hidden">
-                <canvas id="wheel-canvas" width="100" height="100" class="mx-auto rounded-full"></canvas>
-            </div>
-        </aside>
+    <!-- Main Workspace (Monitor) -->
+    <main class="flex-grow flex items-center justify-center p-2 overflow-hidden bg-black/20">
+        <div id="upload-placeholder" class="text-center p-8 border-2 border-dashed border-white/5 rounded-xl cursor-pointer" onclick="document.getElementById('image-input').click()">
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Tap to import media</div>
+        </div>
+        <div id="canvas-container" class="hidden relative max-w-full max-h-full">
+            <div id="blur-bg" class="absolute inset-0 blur-xl"></div>
+            <div id="solid-bg" class="absolute inset-0"></div>
+            <img id="preview-img" class="max-h-[50vh] w-auto relative z-10 shadow-2xl">
+        </div>
+        <input type="file" id="image-input" accept="image/*" class="hidden">
     </main>
 
-    <!-- Bottom Timeline Bar -->
-    <footer class="h-24 border-t border-white/[0.05] bg-[#111114] flex items-center px-4 gap-4 flex-shrink-0">
-        <div id="mini-preview-container" class="w-20 h-16 bg-black rounded border border-white/[0.05] flex items-center justify-center overflow-hidden">
-            <img id="mini-preview-img" class="hidden max-h-full">
+    <!-- Bottom Editing Dock (VN/CapCut Style) -->
+    <footer class="h-auto bg-[#111114] border-t border-white/[0.05] flex flex-col">
+        <!-- Ratios and Blur/Chroma Controls -->
+        <div class="flex items-center gap-2 p-2 overflow-x-auto no-scrollbar">
+            <!-- Ratios -->
+            <button onclick="setRatio('1:1', 1)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">1:1</button>
+            <button onclick="setRatio('16:9', 16/9)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">16:9</button>
+            <button onclick="setRatio('9:16', 9/16)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">9:16</button>
+            
+            <div class="w-[1px] h-6 bg-white/5 mx-1"></div>
+
+            <!-- BG Toggle -->
+            <button onclick="setBgType('blur')" id="bg-blur-btn" class="text-[9px] px-3 py-2 bg-indigo-600 rounded">BLUR</button>
+            <button onclick="setBgType('solid')" id="bg-solid-btn" class="text-[9px] px-3 py-2 bg-white/[0.05] rounded">SOLID</button>
         </div>
-        <div class="flex gap-2">
-            <button onclick="setBgType('blur')" id="bg-blur-btn" class="px-4 py-2 text-[10px] bg-indigo-600 rounded">BLUR</button>
-            <button onclick="setBgType('solid')" id="bg-solid-btn" class="px-4 py-2 text-[10px] bg-white/[0.05] rounded">SOLID</button>
+
+        <!-- Adjusters and Export Row -->
+        <div class="flex items-center px-3 pb-3 gap-4">
+            <div id="mini-preview-container" class="w-12 h-12 bg-black border border-white/10 rounded flex items-center justify-center overflow-hidden">
+                <img id="mini-preview-img" class="hidden max-h-full">
+            </div>
+            
+            <div class="flex-grow">
+                <input type="range" id="blur-slider" min="0" max="100" value="24" class="w-full accent-indigo-500">
+                <div id="color-picker-wrapper" class="hidden mt-2">
+                    <canvas id="wheel-canvas" width="60" height="60" class="rounded-full"></canvas>
+                </div>
+            </div>
+
+            <button id="download-btn" disabled class="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded text-[10px] font-bold uppercase tracking-widest">Export</button>
         </div>
-        <div class="flex-grow"></div>
-        <button id="download-btn" disabled class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded text-[10px] font-bold">EXPORT</button>
     </footer>
 
 </body>
