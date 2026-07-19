@@ -29,7 +29,9 @@ const opacitySlider = document.getElementById('opacity-slider');
 const opacityVal = document.getElementById('opacity-val');
 const colorPreviewPatch = document.getElementById('color-preview-patch');
 
+const miniPreviewContainer = document.getElementById('mini-preview-container');
 const miniPreviewImg = document.getElementById('mini-preview-img');
+const miniBlurBg = document.getElementById('mini-blur-bg');
 const miniSolidBg = document.getElementById('mini-solid-bg');
 
 let currentHue = 239;
@@ -68,6 +70,7 @@ function handleFile(file) {
             previewImg.src = currentImgSrc;
             miniPreviewImg.src = currentImgSrc;
             blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+            miniBlurBg.style.backgroundImage = `url('${currentImgSrc}')`;
             
             updateCanvasDimensions();
         };
@@ -105,7 +108,9 @@ function setBgType(type) {
         pickerWrapper.classList.add('hidden', 'opacity-0');
         blurIntensityWrapper.classList.remove('hidden');
         blurBg.style.opacity = '1';
+        miniBlurBg.style.opacity = '1';
         solidBg.style.backgroundColor = 'transparent';
+        miniSolidBg.style.backgroundColor = 'transparent';
     } else {
         solidBtn.className = "bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
         blurBtn.className = "bg-white/5 border border-white/10 text-gray-400 p-3.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all";
@@ -113,7 +118,7 @@ function setBgType(type) {
         blurIntensityWrapper.classList.add('hidden');
         setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
         blurBg.style.opacity = '0';
-        miniPreviewImg.src = currentImgSrc;
+        miniBlurBg.style.opacity = '0';
         drawColorWheel();
         updateCursorPosition();
         updateChromaBackground();
@@ -124,6 +129,7 @@ blurSlider.addEventListener('input', (e) => {
     blurRadius = e.target.value;
     blurValDisplay.innerText = `${blurRadius}px`;
     blurBg.style.filter = `blur(${blurRadius}px)`;
+    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
 });
 
 blurMinus.addEventListener('click', () => {
@@ -132,6 +138,7 @@ blurMinus.addEventListener('click', () => {
     blurRadius = newVal;
     blurValDisplay.innerText = `${blurRadius}px`;
     blurBg.style.filter = `blur(${blurRadius}px)`;
+    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
 });
 
 blurPlus.addEventListener('click', () => {
@@ -140,6 +147,7 @@ blurPlus.addEventListener('click', () => {
     blurRadius = newVal;
     blurValDisplay.innerText = `${blurRadius}px`;
     blurBg.style.filter = `blur(${blurRadius}px)`;
+    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
 });
 
 function drawColorWheel() {
@@ -337,8 +345,26 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
+    // Mirror matching dimensions to mini preview
+    const miniMaxHeight = 144; // fixed container limit
+    let miniWidth = 240; 
+    let miniHeight = miniWidth / finalRatio;
+
+    if (miniHeight > miniMaxHeight) {
+        miniHeight = miniMaxHeight;
+        miniWidth = miniHeight * finalRatio;
+    }
+
+    miniPreviewContainer.style.width = `${miniWidth}px`;
+    miniPreviewContainer.style.height = `${miniHeight}px`;
+
     blurBg.style.filter = `blur(${blurRadius}px)`;
-    if (backgroundType === 'blur') blurBg.style.opacity = '1';
+    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
+    
+    if (backgroundType === 'blur') {
+        blurBg.style.opacity = '1';
+        miniBlurBg.style.opacity = '1';
+    }
 }
 
 downloadBtn.addEventListener('click', () => {
@@ -406,4 +432,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-        
+                       
