@@ -244,7 +244,9 @@ function updateChromaBackground() {
     const rgbaColor = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
 
     colorPreviewPatch.style.backgroundColor = rgbaColor;
-    if (backgroundType === 'solid') solidBg.style.backgroundColor = rgbaColor;
+    if (backgroundType === 'solid') {
+        solidBg.style.backgroundColor = rgbaColor;
+    }
 }
 
 colorHex.addEventListener('input', (e) => {
