@@ -55,7 +55,6 @@ imageInput.addEventListener('change', (e) => {
     if (e.target.files.length) handleFile(e.target.files[0]);
 });
 
-// Dedicated interactive click handler for your custom visible button element
 replacePhotoBtn.addEventListener('click', (e) => {
     e.preventDefault();
     imageInput.click();
@@ -72,7 +71,6 @@ function handleFile(file) {
             nativeHeight = img.height;
             currentImgSrc = event.target.result;
             
-            // Layout views setup tracking
             uploadPlaceholder.classList.add('hidden');
             canvasContainer.classList.remove('hidden');
             
@@ -80,7 +78,7 @@ function handleFile(file) {
             miniPreviewImg.classList.remove('hidden');
             replacePhotoBtn.classList.remove('hidden');
 
-            // Force override download button states
+            // Fix 1: Properly strip locked UI states and pointer restrictions
             downloadBtn.removeAttribute('disabled');
             downloadBtn.disabled = false;
             downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -92,6 +90,9 @@ function handleFile(file) {
             
             updateCanvasDimensions();
             updateChromaBackground();
+
+            // Fix 2: Clear input value string cache so replace fires seamlessly back-to-back
+            imageInput.value = '';
         };
         img.src = event.target.result;
     };
@@ -403,10 +404,9 @@ function updateCanvasDimensions() {
     }
 }
 
-// Fixed compilation pipelines for device-side downloading execution
 downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    if (!currentImgSrc) return;
+    if (!currentImgSrc || downloadBtn.disabled) return;
 
     const exportCanvas = document.createElement('canvas');
     const ctx = exportCanvas.getContext('2d');
@@ -470,4 +470,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-                
+        
