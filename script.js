@@ -55,7 +55,9 @@ imageInput.addEventListener('change', (e) => {
     if (e.target.files.length) handleFile(e.target.files[0]);
 });
 
-replacePhotoBtn.addEventListener('click', () => {
+// Dedicated interactive click handler for your custom visible button element
+replacePhotoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     imageInput.click();
 });
 
@@ -70,6 +72,7 @@ function handleFile(file) {
             nativeHeight = img.height;
             currentImgSrc = event.target.result;
             
+            // Layout views setup tracking
             uploadPlaceholder.classList.add('hidden');
             canvasContainer.classList.remove('hidden');
             
@@ -77,8 +80,9 @@ function handleFile(file) {
             miniPreviewImg.classList.remove('hidden');
             replacePhotoBtn.classList.remove('hidden');
 
-            // Wake up download button capabilities
+            // Force override download button states
             downloadBtn.removeAttribute('disabled');
+            downloadBtn.disabled = false;
             downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             previewImg.src = currentImgSrc;
@@ -399,7 +403,9 @@ function updateCanvasDimensions() {
     }
 }
 
-downloadBtn.addEventListener('click', () => {
+// Fixed compilation pipelines for device-side downloading execution
+downloadBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     if (!currentImgSrc) return;
 
     const exportCanvas = document.createElement('canvas');
