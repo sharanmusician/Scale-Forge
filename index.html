@@ -86,11 +86,16 @@
                 </div>
 
                 <!-- Shared Mini Preview Window Block -->
-                <div id="mini-preview-container-wrapper" class="hidden pt-1 flex justify-center w-full">
-                    <div id="mini-preview-container" class="relative overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black/40 transition-all duration-300">
+                <div id="mini-preview-container-wrapper" class="pt-1 flex justify-center w-full">
+                    <div id="mini-preview-container" class="w-[240px] h-[144px] relative overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black/40 transition-all duration-300">
+                        <!-- Professional Engine System Status Placeholder Message -->
+                        <div id="mini-placeholder" class="z-20 text-center p-4">
+                            <span class="text-[10px] uppercase font-mono tracking-widest text-indigo-400 block mb-1">Scale Forge Status</span>
+                            <span class="text-xs font-medium text-gray-400">Awaiting Asset Engine Injection...</span>
+                        </div>
                         <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-300 z-0"></div>
                         <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
-                        <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
+                        <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative hidden transition-all duration-300">
                     </div>
                 </div>
 
