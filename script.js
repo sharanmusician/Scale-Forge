@@ -113,6 +113,7 @@ function setBgType(type) {
         blurIntensityWrapper.classList.add('hidden');
         setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
         blurBg.style.opacity = '0';
+        miniPreviewImg.src = currentImgSrc;
         drawColorWheel();
         updateCursorPosition();
         updateChromaBackground();
@@ -405,4 +406,4 @@ downloadBtn.addEventListener('click', () => {
     };
     baseImg.src = currentImgSrc;
 });
-                
+        
