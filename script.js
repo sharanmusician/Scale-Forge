@@ -174,7 +174,6 @@ function drawColorWheel() {
     const height = wheelCanvas.height;
     const cx = width / 2;
     const cy = height / 2;
-    // Perfectly clamped sub-pixel radius to eliminate jagged/broken edges
     const radius = (width / 2) - 1.5;
 
     ctx.clearRect(0, 0, width, height);
@@ -380,7 +379,6 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Fixed mini screen ratio box calculations so horizontal/vertical layouts scale accurately matching main viewport
     const maxMiniW = 180;
     const maxMiniH = 108;
     let miniWidth = maxMiniW;
