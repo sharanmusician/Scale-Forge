@@ -9,7 +9,6 @@ let chromaColor = '#6366f1';
 let chromaOpacity = 1;
 let blurRadius = 24;
 
-// Transformation tracking for crop/drag functionality
 let imgScale = 1;
 let imgPosX = 0;
 let imgPosY = 0;
@@ -119,7 +118,6 @@ function setRatio(label, targetVal) {
     ratioMode = label;
     selectedRatio = targetVal;
     
-    // Maintain full screen status badge label context gracefully if active
     if (isFullScreenMode) {
         ratioBadge.innerText = `${label} (Full Screen)`;
     } else {
@@ -152,7 +150,6 @@ function toggleFullScreen() {
     updateCanvasDimensions();
 }
 
-// Drag / Pan mouse and touch event bindings for crop-like interaction
 canvasContainer.addEventListener('mousedown', (e) => {
     if (!currentImgSrc) return;
     isDragging = true;
@@ -189,7 +186,6 @@ window.addEventListener('touchend', () => {
     isDragging = false;
 });
 
-// Scroll wheel support to zoom in/out interactively like crop scaling
 canvasContainer.addEventListener('wheel', (e) => {
     if (!currentImgSrc) return;
     e.preventDefault();
@@ -473,37 +469,48 @@ function updateCanvasDimensions() {
     const containerAspect = targetWidth / targetHeight;
 
     if (isFullScreenMode) {
-        // Full screen crop mode: image scales up to fill container entirely (no background visible)
-        let renderW, renderH;
+        let baseW, baseH;
         if (imgAspect > containerAspect) {
-            renderH = targetHeight;
-            renderW = targetHeight * imgAspect;
+            baseH = targetHeight;
+            baseW = targetHeight * imgAspect;
         } else {
-            renderW = targetWidth;
-            renderH = targetWidth / imgAspect;
+            baseW = targetWidth;
+            baseH = targetWidth / imgAspect;
         }
         
-        previewImg.style.width = `${renderW}px`;
-        previewImg.style.height = `${renderH}px`;
-        previewImg.style.objectFit = 'fill';
+        previewImg.style.width = `${baseW}px`;
+        previewImg.style.height = `${baseH}px`;
+        previewImg.style.maxWidth = 'none';
+        previewImg.style.maxHeight = 'none';
         
-        miniPreviewImg.style.width = `${(renderW / targetWidth) * 180}px`;
-        miniPreviewImg.style.height = `${(renderH / targetHeight) * 108}px`;
-        miniPreviewImg.style.objectFit = 'fill';
+        miniPreviewImg.style.width = `${(baseW / targetWidth) * 180}px`;
+        miniPreviewImg.style.height = `${(baseH / targetHeight) * 108}px`;
+        miniPreviewImg.style.maxWidth = 'none';
+        miniPreviewImg.style.maxHeight = 'none';
 
         blurBg.style.opacity = '0';
         miniBlurBg.style.opacity = '0';
         solidBg.style.backgroundColor = 'transparent';
         miniSolidBg.style.backgroundColor = 'transparent';
     } else {
-        // Normal ratio fit mode with background visible
-        previewImg.style.width = '100%';
-        previewImg.style.height = '100%';
-        previewImg.style.objectFit = 'contain';
-        
-        miniPreviewImg.style.width = '100%';
-        miniPreviewImg.style.height = '100%';
-        miniPreviewImg.style.objectFit = 'contain';
+        let baseW, baseH;
+        if (imgAspect > containerAspect) {
+            baseW = targetWidth;
+            baseH = targetWidth / imgAspect;
+        } else {
+            baseH = targetHeight;
+            baseW = targetHeight * imgAspect;
+        }
+
+        previewImg.style.width = `${baseW}px`;
+        previewImg.style.height = `${baseH}px`;
+        previewImg.style.maxWidth = 'none';
+        previewImg.style.maxHeight = 'none';
+
+        miniPreviewImg.style.width = `${(baseW / targetWidth) * 180}px`;
+        miniPreviewImg.style.height = `${(baseH / targetHeight) * 108}px`;
+        miniPreviewImg.style.maxWidth = 'none';
+        miniPreviewImg.style.maxHeight = 'none';
 
         if (backgroundType === 'blur') {
             blurBg.style.opacity = '1';
@@ -547,5 +554,4 @@ downloadBtn.addEventListener('click', (e) => {
     const baseImg = new Image();
     baseImg.onload = () => {
         if (!isFullScreenMode) {
-            if (backgroundType === 'solid') {
-                const r = parseInt(ch
+            if (backgroundType === 'soli
