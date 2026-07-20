@@ -3,15 +3,25 @@ let nativeWidth = 0;
 let nativeHeight = 0;
 let selectedRatio = 1; 
 let ratioMode = '1:1';
+let isFullScreenMode = false;
 let backgroundType = 'blur'; 
 let chromaColor = '#6366f1';
 let chromaOpacity = 1;
 let blurRadius = 24;
 
+// Transformation tracking for crop/drag functionality
+let imgScale = 1;
+let imgPosX = 0;
+let imgPosY = 0;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+
 const imageInput = document.getElementById('image-input');
 const uploadPlaceholder = document.getElementById('upload-placeholder');
 const canvasContainer = document.getElementById('canvas-container');
 const previewImg = document.getElementById('preview-img');
+const miniPreviewImg = document.getElementById('mini-preview-img');
 const blurBg = document.getElementById('blur-bg');
 const solidBg = document.getElementById('solid-bg');
 const colorHex = document.getElementById('color-hex');
@@ -35,7 +45,6 @@ const colorPreviewPatch = document.getElementById('color-preview-patch');
 
 const miniPlaceholder = document.getElementById('mini-placeholder');
 const miniPreviewContainer = document.getElementById('mini-preview-container');
-const miniPreviewImg = document.getElementById('mini-preview-img');
 const miniBlurBg = document.getElementById('mini-blur-bg');
 const miniSolidBg = document.getElementById('mini-solid-bg');
 
@@ -88,6 +97,7 @@ function handleFile(file) {
             blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
             miniBlurBg.style.backgroundImage = `url('${currentImgSrc}')`;
             
+            resetTransformations();
             updateCanvasDimensions();
             updateChromaBackground();
 
@@ -98,7 +108,15 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
+function resetTransformations() {
+    imgScale = 1;
+    imgPosX = 0;
+    imgPosY = 0;
+    applyTransform();
+}
+
 function setRatio(label, targetVal) {
+    isFullScreenMode = false;
     ratioMode = label;
     selectedRatio = targetVal;
     ratioBadge.innerText = label;
@@ -110,13 +128,91 @@ function setRatio(label, targetVal) {
         }
     });
 
-    if (label === 'Fullscreen') {
-        fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+    fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
+
+    resetTransformations();
+    updateCanvasDimensions();
+}
+
+function toggleFullScreen() {
+    isFullScreenMode = !isFullScreenMode;
+    
+    if (isFullScreenMode) {
+        ratioBadge.innerText = `${ratioMode} (Full Screen)`;
+        fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
+        
+        document.querySelectorAll('.ratio-btn').forEach(btn => {
+            btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
+        });
     } else {
-        fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+        ratioBadge.innerText = ratioMode;
+        fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
+        
+        document.querySelectorAll('.ratio-btn').forEach(btn => {
+            if(btn.innerText.includes(ratioMode)) {
+                btn.className = "ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
+            }
+        });
     }
 
+    resetTransformations();
     updateCanvasDimensions();
+}
+
+// Drag / Pan mouse and touch event bindings for crop-like interaction
+canvasContainer.addEventListener('mousedown', (e) => {
+    if (!currentImgSrc) return;
+    isDragging = true;
+    startX = e.clientX - imgPosX;
+    startY = e.clientY - imgPosY;
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging || !currentImgSrc) return;
+    imgPosX = e.clientX - startX;
+    imgPosY = e.clientY - startY;
+    applyTransform();
+});
+
+window.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+canvasContainer.addEventListener('touchstart', (e) => {
+    if (!currentImgSrc || e.touches.length !== 1) return;
+    isDragging = true;
+    startX = e.touches[0].clientX - imgPosX;
+    startY = e.touches[0].clientY - imgPosY;
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+    if (!isDragging || !currentImgSrc || e.touches.length !== 1) return;
+    imgPosX = e.touches[0].clientX - startX;
+    imgPosY = e.touches[0].clientY - startY;
+    applyTransform();
+}, { passive: true });
+
+window.addEventListener('touchend', () => {
+    isDragging = false;
+});
+
+// Scroll wheel support to zoom in/out interactively like crop scaling
+canvasContainer.addEventListener('wheel', (e) => {
+    if (!currentImgSrc) return;
+    e.preventDefault();
+    const zoomIntensity = 0.08;
+    if (e.deltaY < 0) {
+        imgScale = Math.min(imgScale * (1 + zoomIntensity), 5);
+    } else {
+        imgScale = Math.max(imgScale * (1 - zoomIntensity), 0.5);
+    }
+    applyTransform();
+}, { passive: false });
+
+function applyTransform() {
+    const transformStr = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+    previewImg.style.transform = transformStr;
+    miniPreviewImg.style.transform = transformStr;
 }
 
 function setBgType(type) {
@@ -366,34 +462,56 @@ colorHex.addEventListener('input', (e) => {
 function updateCanvasDimensions() {
     if (!currentImgSrc) return;
 
-    let finalRatio = selectedRatio;
-    if (selectedRatio === 'full') {
-        finalRatio = nativeWidth / nativeHeight;
-        ratioBadge.innerText = `Full (${nativeWidth}:${nativeHeight})`;
-    }
-
     const viewportWidth = Math.min(window.innerWidth * 0.9, 650);
     const viewportHeight = window.innerHeight * 0.55;
 
     let targetWidth = viewportWidth;
-    let targetHeight = targetWidth / finalRatio;
+    let targetHeight = targetWidth / selectedRatio;
 
     if (targetHeight > viewportHeight) {
         targetHeight = viewportHeight;
-        targetWidth = targetHeight * finalRatio;
+        targetWidth = targetHeight * selectedRatio;
     }
 
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
+    // Size main and mini preview images dynamically based on full screen mode toggle
+    if (isFullScreenMode) {
+        // Scale to completely cover container width and height (crop overflow)
+        const imgAspect = nativeWidth / nativeHeight;
+        const containerAspect = targetWidth / targetHeight;
+        
+        let renderW, renderH;
+        if (imgAspect > containerAspect) {
+            renderH = targetHeight;
+            renderW = targetHeight * imgAspect;
+        } else {
+            renderW = targetWidth;
+            renderH = targetWidth / imgAspect;
+        }
+        
+        previewImg.style.width = `${renderW}px`;
+        previewImg.style.height = `${renderH}px`;
+        miniPreviewImg.style.width = `${(renderW / targetWidth) * 180}px`;
+        miniPreviewImg.style.height = `${(renderH / targetHeight) * 108}px`;
+    } else {
+        previewImg.style.width = '100%';
+        previewImg.style.height = '100%';
+        previewImg.style.objectFit = 'contain';
+        miniPreviewImg.style.width = '100%';
+        miniPreviewImg.style.height = '100%';
+        miniPreviewImg.style.objectFit = 'contain';
+    }
+
     const maxMiniW = 180;
     const maxMiniH = 108;
     let miniWidth = maxMiniW;
-    let miniHeight = miniWidth / finalRatio;
+    let miniHeight = miniWidth / selectedRatio;
 
     if (miniHeight > maxMiniH) {
         miniHeight = maxMiniH;
-        miniWidth = miniHeight * finalRatio;
+        miniWidth = miniHeight * selectedRatio;
     }
 
     miniPreviewContainer.style.width = `${miniWidth}px`;
@@ -403,8 +521,8 @@ function updateCanvasDimensions() {
     miniBlurBg.style.filter = `blur(${blurRadius}px)`;
     
     if (backgroundType === 'blur') {
-        blurBg.style.opacity = '1';
-        miniBlurBg.style.opacity = '1';
+        blurBg.style.opacity = isFullScreenMode ? '0' : '1';
+        miniBlurBg.style.opacity = isFullScreenMode ? '0' : '1';
     }
 }
 
@@ -415,63 +533,4 @@ downloadBtn.addEventListener('click', (e) => {
     const exportCanvas = document.createElement('canvas');
     const ctx = exportCanvas.getContext('2d');
 
-    let finalRatio = selectedRatio;
-    if (selectedRatio === 'full') finalRatio = nativeWidth / nativeHeight;
-
-    let outWidth = nativeWidth;
-    let outHeight = nativeWidth / finalRatio;
-
-    if (outHeight < nativeHeight) {
-        outHeight = nativeHeight;
-        outWidth = outHeight * finalRatio;
-    }
-
-    exportCanvas.width = outWidth;
-    exportCanvas.height = outHeight;
-
-    const baseImg = new Image();
-    baseImg.onload = () => {
-        if (backgroundType === 'solid') {
-            const r = parseInt(chromaColor.slice(1, 3), 16);
-            const g = parseInt(chromaColor.slice(3, 5), 16);
-            const b = parseInt(chromaColor.slice(5, 7), 16);
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
-            ctx.fillRect(0, 0, outWidth, outHeight);
-            renderForegroundAsset();
-        } else {
-            ctx.filter = `blur(${blurRadius}px)`;
-            
-            let bgWidth = outWidth;
-            let bgHeight = (outWidth / nativeWidth) * nativeHeight;
-            
-            if (bgHeight < outHeight) {
-                bgHeight = outHeight;
-                bgWidth = (outHeight / nativeHeight) * nativeWidth;
-            }
-            
-            const bgX = (outWidth - bgWidth) / 2;
-            const bgY = (outHeight - bgHeight) / 2;
-            
-            ctx.drawImage(baseImg, bgX - 55, bgY - 55, bgWidth + 110, bgHeight + 110);
-            ctx.filter = 'none';
-            
-            ctx.fillStyle = "rgba(0,0,0,0.15)";
-            ctx.fillRect(0, 0, outWidth, outHeight);
-
-            renderForegroundAsset();
-        }
-
-        function renderForegroundAsset() {
-            const fgX = (outWidth - nativeWidth) / 2;
-            const fgY = (outHeight - nativeHeight) / 2;
-            ctx.drawImage(baseImg, fgX, fgY, nativeWidth, nativeHeight);
-
-            const link = document.createElement('a');
-            link.download = 'scale-forge-export.png';
-            link.href = exportCanvas.toDataURL('image/png');
-            link.click();
-        }
-    };
-    baseImg.src = currentImgSrc;
-});
-                
+    const viewportW = parse
