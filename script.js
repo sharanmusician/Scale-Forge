@@ -103,9 +103,9 @@ function setRatio(label, targetVal) {
     ratioBadge.innerText = label;
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
-        btn.className = "ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
+        btn.className = "ratio-btn w-full h-[52px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
         if(btn.innerText.includes(label)) {
-            btn.className = "ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
+            btn.className = "ratio-btn w-full h-[52px] bg-indigo-500/10 border border-indigo-500 text-white px-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
         }
     });
 
@@ -174,8 +174,8 @@ function drawColorWheel() {
     const height = wheelCanvas.height;
     const cx = width / 2;
     const cy = height / 2;
-    // Fixed broken outline edge by securely inseting radius by 1px
-    const radius = (width / 2) - 1;
+    // Perfectly clamped sub-pixel radius to eliminate jagged/broken edges
+    const radius = (width / 2) - 1.5;
 
     ctx.clearRect(0, 0, width, height);
 
@@ -207,7 +207,7 @@ function handleWheelSelection(clientX, clientY) {
     const dx = x - cx;
     const dy = y - cy;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const radius = (wheelCanvas.width / 2) - 1;
+    const radius = (wheelCanvas.width / 2) - 1.5;
 
     if (distance <= radius) {
         let angle = Math.atan2(dy, dx) * (180 / Math.PI);
@@ -238,7 +238,7 @@ function handleWheelSelection(clientX, clientY) {
 function updateCursorPosition() {
     const cx = wheelCanvas.width / 2;
     const cy = wheelCanvas.height / 2;
-    const radius = (wheelCanvas.width / 2) - 1;
+    const radius = (wheelCanvas.width / 2) - 1.5;
     const angleRad = currentHue * (Math.PI / 180);
     const distance = (currentSaturation / 100) * radius;
 
@@ -380,14 +380,14 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Fixed mini preview mapping for precise 4:3 and custom aspect ratios matching the main preview bounds
-    const miniMaxWidth = 180;
-    const miniMaxHeight = 108;
-    let miniWidth = miniMaxWidth;
+    // Fixed mini screen ratio box calculations so horizontal/vertical layouts scale accurately matching main viewport
+    const maxMiniW = 180;
+    const maxMiniH = 108;
+    let miniWidth = maxMiniW;
     let miniHeight = miniWidth / finalRatio;
 
-    if (miniHeight > miniMaxHeight) {
-        miniHeight = miniMaxHeight;
+    if (miniHeight > maxMiniH) {
+        miniHeight = maxMiniH;
         miniWidth = miniHeight * finalRatio;
     }
 
@@ -469,4 +469,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-        
+    
