@@ -103,10 +103,9 @@ function setRatio(label, targetVal) {
     ratioBadge.innerText = label;
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
-        // VN Style Adaptive layout reset for precise shapes
-        btn.className = "ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-2.5 rounded-xl flex items-center gap-3.5 text-xs font-medium transition-all text-left";
+        btn.className = "ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
         if(btn.innerText.includes(label)) {
-            btn.className = "ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-2.5 rounded-xl flex items-center gap-3.5 text-xs font-medium transition-all text-left";
+            btn.className = "ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left";
         }
     });
 
@@ -120,8 +119,8 @@ function setBgType(type) {
     const pickerWrapper = document.getElementById('color-picker-wrapper');
 
     if (type === 'blur') {
-        blurBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all";
-        solidBtn.className = "bg-transparent text-gray-400 hover:text-white py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all";
+        blurBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all";
+        solidBtn.className = "bg-transparent text-gray-400 hover:text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all";
         pickerWrapper.classList.add('hidden', 'opacity-0');
         blurIntensityWrapper.classList.remove('hidden');
         
@@ -130,8 +129,8 @@ function setBgType(type) {
         solidBg.style.backgroundColor = 'transparent';
         miniSolidBg.style.backgroundColor = 'transparent';
     } else {
-        solidBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all";
-        blurBtn.className = "bg-transparent text-gray-400 hover:text-white py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all";
+        solidBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all";
+        blurBtn.className = "bg-transparent text-gray-400 hover:text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all";
         pickerWrapper.classList.remove('hidden');
         blurIntensityWrapper.classList.add('hidden');
         setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
@@ -175,7 +174,8 @@ function drawColorWheel() {
     const height = wheelCanvas.height;
     const cx = width / 2;
     const cy = height / 2;
-    const radius = width / 2;
+    // Fixed broken outline edge by securely inseting radius by 1px
+    const radius = (width / 2) - 1;
 
     ctx.clearRect(0, 0, width, height);
 
@@ -207,7 +207,7 @@ function handleWheelSelection(clientX, clientY) {
     const dx = x - cx;
     const dy = y - cy;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const radius = wheelCanvas.width / 2;
+    const radius = (wheelCanvas.width / 2) - 1;
 
     if (distance <= radius) {
         let angle = Math.atan2(dy, dx) * (180 / Math.PI);
@@ -238,7 +238,7 @@ function handleWheelSelection(clientX, clientY) {
 function updateCursorPosition() {
     const cx = wheelCanvas.width / 2;
     const cy = wheelCanvas.height / 2;
-    const radius = wheelCanvas.width / 2;
+    const radius = (wheelCanvas.width / 2) - 1;
     const angleRad = currentHue * (Math.PI / 180);
     const distance = (currentSaturation / 100) * radius;
 
@@ -380,8 +380,10 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    const miniMaxHeight = 144;
-    let miniWidth = 240; 
+    // Fixed mini preview mapping for precise 4:3 and custom aspect ratios matching the main preview bounds
+    const miniMaxWidth = 180;
+    const miniMaxHeight = 108;
+    let miniWidth = miniMaxWidth;
     let miniHeight = miniWidth / finalRatio;
 
     if (miniHeight > miniMaxHeight) {
@@ -467,4 +469,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-            
+        
