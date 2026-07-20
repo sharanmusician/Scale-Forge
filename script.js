@@ -468,8 +468,8 @@ function updateCanvasDimensions() {
     const imgAspect = nativeWidth / nativeHeight;
     const containerAspect = targetWidth / targetHeight;
 
+    let baseW, baseH;
     if (isFullScreenMode) {
-        let baseW, baseH;
         if (imgAspect > containerAspect) {
             baseH = targetHeight;
             baseW = targetHeight * imgAspect;
@@ -477,23 +477,11 @@ function updateCanvasDimensions() {
             baseW = targetWidth;
             baseH = targetWidth / imgAspect;
         }
-        
-        previewImg.style.width = `${baseW}px`;
-        previewImg.style.height = `${baseH}px`;
-        previewImg.style.maxWidth = 'none';
-        previewImg.style.maxHeight = 'none';
-        
-        miniPreviewImg.style.width = `${(baseW / targetWidth) * 180}px`;
-        miniPreviewImg.style.height = `${(baseH / targetHeight) * 108}px`;
-        miniPreviewImg.style.maxWidth = 'none';
-        miniPreviewImg.style.maxHeight = 'none';
-
         blurBg.style.opacity = '0';
         miniBlurBg.style.opacity = '0';
         solidBg.style.backgroundColor = 'transparent';
         miniSolidBg.style.backgroundColor = 'transparent';
     } else {
-        let baseW, baseH;
         if (imgAspect > containerAspect) {
             baseW = targetWidth;
             baseH = targetWidth / imgAspect;
@@ -501,17 +489,6 @@ function updateCanvasDimensions() {
             baseH = targetHeight;
             baseW = targetHeight * imgAspect;
         }
-
-        previewImg.style.width = `${baseW}px`;
-        previewImg.style.height = `${baseH}px`;
-        previewImg.style.maxWidth = 'none';
-        previewImg.style.maxHeight = 'none';
-
-        miniPreviewImg.style.width = `${(baseW / targetWidth) * 180}px`;
-        miniPreviewImg.style.height = `${(baseH / targetHeight) * 108}px`;
-        miniPreviewImg.style.maxWidth = 'none';
-        miniPreviewImg.style.maxHeight = 'none';
-
         if (backgroundType === 'blur') {
             blurBg.style.opacity = '1';
             miniBlurBg.style.opacity = '1';
@@ -519,6 +496,16 @@ function updateCanvasDimensions() {
             updateChromaBackground();
         }
     }
+
+    previewImg.style.width = `${baseW}px`;
+    previewImg.style.height = `${baseH}px`;
+    previewImg.style.maxWidth = 'none';
+    previewImg.style.maxHeight = 'none';
+
+    miniPreviewImg.style.width = `${(baseW / targetWidth) * 180}px`;
+    miniPreviewImg.style.height = `${(baseH / targetHeight) * 108}px`;
+    miniPreviewImg.style.maxWidth = 'none';
+    miniPreviewImg.style.maxHeight = 'none';
 
     const maxMiniW = 180;
     const maxMiniH = 108;
@@ -554,4 +541,12 @@ downloadBtn.addEventListener('click', (e) => {
     const baseImg = new Image();
     baseImg.onload = () => {
         if (!isFullScreenMode) {
-            if (backgroundType === 'soli
+            if (backgroundType === 'solid') {
+                const r = parseInt(chromaColor.slice(1, 3), 16);
+                const g = parseInt(chromaColor.slice(3, 5), 16);
+                const b = parseInt(chromaColor.slice(5, 7), 16);
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
+                ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            } else if (backgroundType === 'blur') {
+                ctx.filter = `blur(${blurRadius}px)`;
+                ctx.drawImage(baseImg, 0, 0, export
