@@ -116,10 +116,15 @@ function resetTransformations() {
 }
 
 function setRatio(label, targetVal) {
-    isFullScreenMode = false;
     ratioMode = label;
     selectedRatio = targetVal;
-    ratioBadge.innerText = label;
+    
+    // Maintain full screen status badge label context gracefully if active
+    if (isFullScreenMode) {
+        ratioBadge.innerText = `${label} (Full Screen)`;
+    } else {
+        ratioBadge.innerText = label;
+    }
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
         btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
@@ -127,8 +132,6 @@ function setRatio(label, targetVal) {
             btn.className = "ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
         }
     });
-
-    fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
 
     resetTransformations();
     updateCanvasDimensions();
@@ -140,19 +143,9 @@ function toggleFullScreen() {
     if (isFullScreenMode) {
         ratioBadge.innerText = `${ratioMode} (Full Screen)`;
         fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
-        
-        document.querySelectorAll('.ratio-btn').forEach(btn => {
-            btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
-        });
     } else {
         ratioBadge.innerText = ratioMode;
         fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3 select-none";
-        
-        document.querySelectorAll('.ratio-btn').forEach(btn => {
-            if(btn.innerText.includes(ratioMode)) {
-                btn.className = "ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
-            }
-        });
     }
 
     resetTransformations();
@@ -227,8 +220,8 @@ function setBgType(type) {
         pickerWrapper.classList.add('hidden', 'opacity-0');
         blurIntensityWrapper.classList.remove('hidden');
         
-        blurBg.style.opacity = '1';
-        if (currentImgSrc) miniBlurBg.style.opacity = '1';
+        blurBg.style.opacity = isFullScreenMode ? '0' : '1';
+        if (currentImgSrc) miniBlurBg.style.opacity = isFullScreenMode ? '0' : '1';
         solidBg.style.backgroundColor = 'transparent';
         miniSolidBg.style.backgroundColor = 'transparent';
     } else {
@@ -421,7 +414,7 @@ function updateChromaBackground() {
     const rgbaColor = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
 
     colorPreviewPatch.style.backgroundColor = rgbaColor;
-    if (backgroundType === 'solid') {
+    if (backgroundType === 'solid' && !isFullScreenMode) {
         solidBg.style.backgroundColor = rgbaColor;
         miniSolidBg.style.backgroundColor = rgbaColor;
     }
@@ -476,12 +469,11 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Size main and mini preview images dynamically based on full screen mode toggle
+    const imgAspect = nativeWidth / nativeHeight;
+    const containerAspect = targetWidth / targetHeight;
+
     if (isFullScreenMode) {
-        // Scale to completely cover container width and height (crop overflow)
-        const imgAspect = nativeWidth / nativeHeight;
-        const containerAspect = targetWidth / targetHeight;
-        
+        // Full screen crop mode: image scales up to fill container entirely (no background visible)
         let renderW, renderH;
         if (imgAspect > containerAspect) {
             renderH = targetHeight;
@@ -493,15 +485,32 @@ function updateCanvasDimensions() {
         
         previewImg.style.width = `${renderW}px`;
         previewImg.style.height = `${renderH}px`;
+        previewImg.style.objectFit = 'fill';
+        
         miniPreviewImg.style.width = `${(renderW / targetWidth) * 180}px`;
         miniPreviewImg.style.height = `${(renderH / targetHeight) * 108}px`;
+        miniPreviewImg.style.objectFit = 'fill';
+
+        blurBg.style.opacity = '0';
+        miniBlurBg.style.opacity = '0';
+        solidBg.style.backgroundColor = 'transparent';
+        miniSolidBg.style.backgroundColor = 'transparent';
     } else {
+        // Normal ratio fit mode with background visible
         previewImg.style.width = '100%';
         previewImg.style.height = '100%';
         previewImg.style.objectFit = 'contain';
+        
         miniPreviewImg.style.width = '100%';
         miniPreviewImg.style.height = '100%';
         miniPreviewImg.style.objectFit = 'contain';
+
+        if (backgroundType === 'blur') {
+            blurBg.style.opacity = '1';
+            miniBlurBg.style.opacity = '1';
+        } else {
+            updateChromaBackground();
+        }
     }
 
     const maxMiniW = 180;
@@ -519,11 +528,6 @@ function updateCanvasDimensions() {
 
     blurBg.style.filter = `blur(${blurRadius}px)`;
     miniBlurBg.style.filter = `blur(${blurRadius}px)`;
-    
-    if (backgroundType === 'blur') {
-        blurBg.style.opacity = isFullScreenMode ? '0' : '1';
-        miniBlurBg.style.opacity = isFullScreenMode ? '0' : '1';
-    }
 }
 
 downloadBtn.addEventListener('click', (e) => {
@@ -533,4 +537,15 @@ downloadBtn.addEventListener('click', (e) => {
     const exportCanvas = document.createElement('canvas');
     const ctx = exportCanvas.getContext('2d');
 
-    const viewportW = parse
+    const viewportW = parseFloat(canvasContainer.style.width) || 400;
+    const viewportH = parseFloat(canvasContainer.style.height) || 400;
+    const scaleFactor = nativeWidth / viewportW;
+
+    exportCanvas.width = viewportW * scaleFactor;
+    exportCanvas.height = viewportH * scaleFactor;
+
+    const baseImg = new Image();
+    baseImg.onload = () => {
+        if (!isFullScreenMode) {
+            if (backgroundType === 'solid') {
+                const r = parseInt(ch
