@@ -23,6 +23,7 @@ const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
 const blurMinus = document.getElementById('blur-minus');
 const blurPlus = document.getElementById('blur-plus');
 const replacePhotoBtn = document.getElementById('replace-photo-btn');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
 
 const wheelCanvas = document.getElementById('wheel-canvas');
 const wheelCursor = document.getElementById('wheel-cursor');
@@ -108,6 +109,12 @@ function setRatio(label, targetVal) {
             btn.className = "ratio-btn w-full h-[52px] bg-indigo-500/10 border border-indigo-500 text-white px-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
         }
     });
+
+    if (label === 'Fullscreen') {
+        fullscreenBtn.className = "w-full h-[48px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0";
+    } else {
+        fullscreenBtn.className = "w-full h-[48px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0";
+    }
 
     updateCanvasDimensions();
 }
@@ -467,4 +474,3 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-    
