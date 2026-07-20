@@ -471,8 +471,8 @@ function updateCanvasDimensions() {
     let baseW, baseH;
     if (isFullScreenMode) {
         if (imgAspect > containerAspect) {
-            baseH = targetHeight;
             baseW = targetHeight * imgAspect;
+            baseH = targetHeight;
         } else {
             baseW = targetWidth;
             baseH = targetWidth / imgAspect;
@@ -486,8 +486,8 @@ function updateCanvasDimensions() {
             baseW = targetWidth;
             baseH = targetWidth / imgAspect;
         } else {
-            baseH = targetHeight;
             baseW = targetHeight * imgAspect;
+            baseH = targetHeight;
         }
         if (backgroundType === 'blur') {
             blurBg.style.opacity = '1';
