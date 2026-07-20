@@ -2,68 +2,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scale Forge | Mobile Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scale Forge | Studio Editing Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Force no scrolling and ensure touch-friendly UI */
-        body { touch-action: manipulation; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="h-screen w-screen bg-[#0b0b0d] text-gray-200 flex flex-col overflow-hidden font-sans">
+<body class="min-h-screen bg-[#0b0b0d] text-gray-200 antialiased selection:bg-indigo-500/30 font-['Plus_Jakarta_Sans',sans-serif] flex flex-col justify-between">
 
-    <!-- Top Toolbar (Project Name + Import) -->
-    <header class="h-12 border-b border-white/[0.05] flex items-center px-4 justify-between bg-[#0b0b0d]">
-        <span class="text-[10px] font-bold text-indigo-400 tracking-widest">SCALE FORGE // EDITOR</span>
-        <button id="replace-photo-btn" class="hidden text-[9px] bg-white/[0.05] border border-white/[0.1] px-3 py-1 rounded">IMPORT</button>
+    <!-- Top Action Platform Bar Banner -->
+    <header class="bg-[#111114] border-b border-white/[0.04] px-6 py-2.5 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-2.5">
+            <div class="h-7 w-7 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/10">
+                <span class="text-white font-black text-[10px] tracking-wider">SF</span>
+            </div>
+            <div>
+                <span class="font-bold text-xs tracking-tight text-white block">Scale Forge</span>
+                <span class="text-[9px] block text-gray-500 font-mono -mt-0.5 tracking-wider">WORKSPACE_V2.4</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button type="button" id="replace-photo-btn" class="hidden text-[11px] text-gray-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] px-3 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1.5 select-none">
+                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
+                Import New Media
+            </button>
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+        </div>
     </header>
 
-    <!-- Main Workspace (Monitor) -->
-    <main class="flex-grow flex items-center justify-center p-2 overflow-hidden bg-black/20">
-        <div id="upload-placeholder" class="text-center p-8 border-2 border-dashed border-white/5 rounded-xl cursor-pointer" onclick="document.getElementById('image-input').click()">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Tap to import media</div>
-        </div>
-        <div id="canvas-container" class="hidden relative max-w-full max-h-full">
-            <div id="blur-bg" class="absolute inset-0 blur-xl"></div>
-            <div id="solid-bg" class="absolute inset-0"></div>
-            <img id="preview-img" class="max-h-[50vh] w-auto relative z-10 shadow-2xl">
-        </div>
-        <input type="file" id="image-input" accept="image/*" class="hidden">
-    </main>
-
-    <!-- Bottom Editing Dock (VN/CapCut Style) -->
-    <footer class="h-auto bg-[#111114] border-t border-white/[0.05] flex flex-col">
-        <!-- Ratios and Blur/Chroma Controls -->
-        <div class="flex items-center gap-2 p-2 overflow-x-auto no-scrollbar">
-            <!-- Ratios -->
-            <button onclick="setRatio('1:1', 1)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">1:1</button>
-            <button onclick="setRatio('16:9', 16/9)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">16:9</button>
-            <button onclick="setRatio('9:16', 9/16)" class="ratio-btn text-[9px] px-3 py-2 bg-white/[0.05] rounded whitespace-nowrap">9:16</button>
+    <!-- VN/CapCut Styled Two-Tier Workstation Panel -->
+    <main class="flex-grow w-full max-w-[1600px] mx-auto p-4 flex flex-col gap-4">
+        
+        <!-- TIER 1: UPPER EDITING STAGE PANEL CONTROLLERS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch h-auto lg:h-[400px]">
             
-            <div class="w-[1px] h-6 bg-white/5 mx-1"></div>
+            <!-- LEFT MODULE: ASSET CAPTURE & TIMELINE RATIOS (5 Columns) -->
+            <section class="lg:col-span-5 bg-[#141417] border border-white/[0.04] p-4 rounded-xl flex flex-col justify-between shadow-xl">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/[0.04] pb-2">
+                        <h2 class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Media Canvas Presets</h2>
+                        <span id="ratio-badge" class="text-[10px] bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20 font-mono font-bold">1:1</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setRatio('1:1', 1)" class="ratio-btn w-full bg-indigo-500/10 border border-indigo-500 text-white p-3 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left">
+                            <div class="w-4 h-4 border-2 border-current rounded-[3px] flex-shrink-0 opacity-90"></div>
+                            <span>1:1 Square</span>
+                        </button>
+                        
+                        <button onclick="setRatio('16:9', 16/9)" class="ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left">
+                            <div class="w-5 h-3.5 border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span>16:9 Landscape</span>
+                        </button>
+                        
+                        <button onclick="setRatio('9:16', 9/16)" class="ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left">
+                            <div class="w-3.5 h-5 border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span>9:16 Vertical Story</span>
+                        </button>
+                        
+                        <button onclick="setRatio('4:3', 4/3)" class="ratio-btn w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left">
+                            <!-- Fixed 4:3 Proportionate Visual Box Shape Frame -->
+                            <div class="w-[18px] h-[13.5px] border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span>4:3 Standard Frame</span>
+                        </button>
+                    </div>
+                </div>
 
-            <!-- BG Toggle -->
-            <button onclick="setBgType('blur')" id="bg-blur-btn" class="text-[9px] px-3 py-2 bg-indigo-600 rounded">BLUR</button>
-            <button onclick="setBgType('solid')" id="bg-solid-btn" class="text-[9px] px-3 py-2 bg-white/[0.05] rounded">SOLID</button>
+                <button onclick="setRatio('Fullscreen', 'full')" class="ratio-btn mt-2 w-full bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] p-3 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all">
+                    <div class="w-4 h-4 border-2 border-dashed border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                    <span>Match Native Source File Dimensions</span>
+                </button>
+            </section>
+
+            <!-- RIGHT MODULE: VN CENTERED LIVE MONITOR VIEWPORT WINDOW (7 Columns) -->
+            <section class="lg:col-span-7 bg-black rounded-xl border border-white/[0.04] p-4 flex items-center justify-center relative overflow-hidden shadow-2xl">
+                <div class="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none"></div>
+                
+                <div id="upload-placeholder" class="z-10 text-center p-6 cursor-pointer transition-transform duration-300 hover:scale-105 select-none" onclick="document.getElementById('image-input').click()">
+                    <div class="mx-auto h-12 w-12 bg-white/[0.02] rounded-xl flex items-center justify-center border border-white/[0.08] mb-3 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Tap to Feed Monitor Pipeline</h3>
+                </div>
+
+                <div id="canvas-container" class="hidden relative shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-all duration-300 max-w-full max-h-full overflow-hidden rounded-lg border border-white/[0.08] flex items-center justify-center bg-[#09090b]">
+                    <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl transition-opacity duration-300 z-0"></div>
+                    <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
+                    <img id="preview-img" src="" alt="Workspace Asset" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300">
+                </div>
+            </section>
+
         </div>
 
-        <!-- Adjusters and Export Row -->
-        <div class="flex items-center px-3 pb-3 gap-4">
-            <div id="mini-preview-container" class="w-12 h-12 bg-black border border-white/10 rounded flex items-center justify-center overflow-hidden">
-                <img id="mini-preview-img" class="hidden max-h-full">
-            </div>
+        <!-- TIER 2: BASE ROW TIMELINE EDIT TRACK PARAMETER ENVIRONMENT Matrix -->
+        <div class="bg-[#141417] border border-white/[0.04] p-5 rounded-xl shadow-xl flex flex-col md:flex-row gap-6 items-center justify-between">
             
-            <div class="flex-grow">
-                <input type="range" id="blur-slider" min="0" max="100" value="24" class="w-full accent-indigo-500">
-                <div id="color-picker-wrapper" class="hidden mt-2">
-                    <canvas id="wheel-canvas" width="60" height="60" class="rounded-full"></canvas>
+            <!-- LEFT LAYER: Live Track Miniature Map Overlay Vector Dashboard View -->
+            <div id="mini-preview-container-wrapper" class="flex-shrink-0">
+                <div id="mini-preview-container" class="w-[180px] h-[108px] relative overflow-hidden rounded-lg border border-white/[0.08] flex items-center justify-center bg-black/60 shadow-inner">
+                    <div id="mini-placeholder" class="z-20 text-center p-2">
+                        <span class="text-[8px] uppercase font-mono tracking-widest text-indigo-400 block opacity-50">Monitor Output</span>
+                        <span class="text-[10px] font-medium text-gray-600">Awaiting Track...</span>
+                    </div>
+                    <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 opacity-0 transition-opacity duration-300 z-0"></div>
+                    <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0"></div>
+                    <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative hidden transition-all duration-300">
                 </div>
             </div>
 
-            <button id="download-btn" disabled class="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded text-[10px] font-bold uppercase tracking-widest">Export</button>
+            <!-- CENTER LAYER: Unified Variable Timeline Editing Control Modules -->
+            <div class="flex-grow w-full space-y-4">
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between border-b border-white/[0.04] pb-2">
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-gray-400">2. Track Composition Matrix</h2>
+                    
+                    <div class="grid grid-cols-2 gap-1 bg-black/40 p-0.5 rounded-lg border border-white/[0.02] w-full sm:w-auto">
+                        <button onclick="setBgType('blur')" id="bg-blur-btn" class="bg-indigo-500/10 border border-indigo-500/30 text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all">
+                            Blur Track
+                        </button>
+                        <button onclick="setBgType('solid')" id="bg-solid-btn" class="bg-transparent text-gray-400 hover:text-white px-4 py-1.5 rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all">
+                            Chroma Track
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    <!-- Blur Profile Node Slider Layer -->
+                    <div id="blur-intensity-wrapper" class="space-y-2 bg-black/20 p-3 rounded-lg border border-white/[0.02]">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Blur Intensity</label>
+                            <span id="blur-val-display" class="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded font-bold">24px</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="blur-minus" class="w-7 h-7 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-md text-xs select-none font-bold">-</button>
+                            <input type="range" id="blur-slider" min="0" max="100" value="24" class="flex-grow h-1 bg-white/[0.08] rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <button type="button" id="blur-plus" class="w-7 h-7 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-md text-xs select-none font-bold">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Chroma Profile Vector Wheel Module Layer -->
+                    <div id="color-picker-wrapper" class="hidden opacity-0 flex flex-col sm:flex-row items-center gap-4 bg-black/20 p-3 rounded-lg border border-white/[0.02] transition-all duration-300">
+                        <div class="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                            <canvas id="wheel-canvas" width="96" height="96" class="cursor-crosshair rounded-full border border-white/[0.08]"></canvas>
+                            <div id="wheel-cursor" class="absolute w-3 h-3 border border-white rounded-full shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                        </div>
+
+                        <div class="flex-grow w-full space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Alpha Opacity</label>
+                                <span id="opacity-val" class="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded font-bold">100%</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="opacity-minus" class="w-7 h-7 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-md text-xs select-none font-bold">-</button>
+                                <input type="range" id="opacity-slider" min="0" max="100" value="100" class="flex-grow h-1 bg-white/[0.08] rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                                <button type="button" id="opacity-plus" class="w-7 h-7 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-md text-xs select-none font-bold">+</button>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 bg-black/40 px-2 py-1.5 rounded-md border border-white/[0.04]">
+                                <div class="w-4 h-4 rounded-sm border border-white/[0.1] shadow-inner" id="color-preview-patch" style="background-color: #6366f1;"></div>
+                                <input type="text" id="color-hex" value="#6366f1" class="bg-transparent text-[10px] font-mono text-gray-300 focus:outline-none w-full uppercase tracking-wider">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT LAYER: Dedicated Timeline Export Command Trigger Module -->
+            <div class="flex-shrink-0 w-full md:w-auto text-center space-y-1">
+                <button id="download-btn" disabled class="w-full md:w-[160px] bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/5 opacity-50 cursor-not-allowed text-[11px] uppercase tracking-wider transition-all select-none">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export Video
+                </button>
+                <p class="text-[9px] text-gray-600 font-mono tracking-tighter">LOCAL_RENDER_ACCEL</p>
+            </div>
+
         </div>
+    </main>
+
+    <footer class="border-t border-white/[0.03] px-6 py-2.5 text-center text-[9px] text-gray-600 font-mono tracking-wide bg-[#111114]">
+        &copy; 2026 Aethercore Interactive. Studio Engine Status: Synchronized.
     </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>
