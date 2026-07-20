@@ -44,9 +44,8 @@
                         <span id="ratio-badge" class="text-[10px] bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20 font-mono font-bold">1:1</span>
                     </div>
                     
-                    <!-- Fixed flex shrink and rigid button dimensions to prevent collapsing or shifting -->
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="setRatio('1:1', 1)" class="ratio-btn w-full h-[52px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
+                        <button onclick="setRatio('1:1', 1)" class="ratio-btn w-full h-[52px] bg-indigo-500/10 border border-indigo-500 text-white px-3.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
                             <div class="w-4 h-4 border-2 border-current rounded-[3px] flex-shrink-0 opacity-90"></div>
                             <span class="truncate">1:1 Square</span>
                         </button>
@@ -68,7 +67,7 @@
                     </div>
                 </div>
 
-                <button onclick="setRatio('Fullscreen', 'full')" class="ratio-btn mt-3 w-full h-[48px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0">
+                <button id="fullscreen-btn" onclick="setRatio('Fullscreen', 'full')" class="w-full h-[48px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0">
                     <div class="w-4 h-4 border-2 border-dashed border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
                     <span class="truncate">Match Native Source File Dimensions</span>
                 </button>
@@ -184,5 +183,4 @@
 
     <script src="script.js"></script>
 </body>
-    </html>
-    
+</html>
