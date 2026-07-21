@@ -1,504 +1,188 @@
-let currentImgSrc = '';
-let nativeWidth = 0;
-let nativeHeight = 0;
-let selectedRatio = 1; 
-let ratioMode = '1:1';
-let isFullscreen = false;
-let backgroundType = 'blur'; 
-let chromaColor = '#6366f1';
-let chromaOpacity = 1;
-let blurRadius = 24;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scale Forge | Studio Editing Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-[#0b0b0d] text-gray-200 antialiased selection:bg-indigo-500/30 font-['Plus_Jakarta_Sans',sans-serif] flex flex-col justify-between">
 
-const imageInput = document.getElementById('image-input');
-const uploadPlaceholder = document.getElementById('upload-placeholder');
-const canvasContainer = document.getElementById('canvas-container');
-const previewImg = document.getElementById('preview-img');
-const blurBg = document.getElementById('blur-bg');
-const solidBg = document.getElementById('solid-bg');
-const colorHex = document.getElementById('color-hex');
-const downloadBtn = document.getElementById('download-btn');
-const ratioBadge = document.getElementById('ratio-badge');
-const blurSlider = document.getElementById('blur-slider');
-const blurValDisplay = document.getElementById('blur-val-display');
-const blurIntensityWrapper = document.getElementById('blur-intensity-wrapper');
-const blurMinus = document.getElementById('blur-minus');
-const blurPlus = document.getElementById('blur-plus');
-const replacePhotoBtn = document.getElementById('replace-photo-btn');
-const fullscreenBtn = document.getElementById('fullscreen-btn');
+    <!-- Top Action Platform Bar Banner -->
+    <header class="bg-[#111114] border-b border-white/[0.04] px-6 py-3 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-2.5">
+            <div class="h-7 w-7 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/10">
+                <span class="text-white font-black text-[10px] tracking-wider">SF</span>
+            </div>
+            <div>
+                <span class="font-bold text-xs tracking-tight text-white block">Scale Forge</span>
+                <span class="text-[9px] block text-gray-500 font-mono -mt-0.5 tracking-wider">WORKSPACE_V2.4</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button type="button" id="replace-photo-btn" class="hidden text-[11px] text-gray-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] px-3.5 py-2 rounded-xl transition-all font-medium flex items-center gap-2 select-none z-30">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
+                Upload Image
+            </button>
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+        </div>
+    </header>
 
-const wheelCanvas = document.getElementById('wheel-canvas');
-const wheelCursor = document.getElementById('wheel-cursor');
-const opacitySlider = document.getElementById('opacity-slider');
-const opacityVal = document.getElementById('opacity-val');
-const opacityMinus = document.getElementById('opacity-minus');
-const opacityPlus = document.getElementById('opacity-plus');
-const colorPreviewPatch = document.getElementById('color-preview-patch');
+    <!-- VN/CapCut Styled Two-Tier Workstation Panel -->
+    <main class="flex-grow w-full max-w-[1600px] mx-auto p-4 flex flex-col gap-4">
+        
+        <!-- TIER 1: UPPER EDITING STAGE PANEL CONTROLLERS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch h-auto lg:h-[420px]">
+            
+            <!-- LEFT MODULE: ASSET CAPTURE & TIMELINE RATIOS (5 Columns) -->
+            <section class="lg:col-span-5 bg-[#141417] border border-white/[0.04] p-5 rounded-xl flex flex-col justify-between shadow-xl">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/[0.04] pb-3">
+                        <h2 class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Media Canvas Presets</h2>
+                        <span id="ratio-badge" class="text-[10px] bg-indigo-500/10 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/20 font-mono font-bold">1:1</span>
+                    </div>
+                    
+                    <!-- Fixed 2x2 grid with exact explicit row tracks to completely prevent vertical shifts -->
+                    <div class="grid grid-cols-2 grid-rows-2 gap-3.5">
+                        <button onclick="setRatio('1:1', 1)" class="ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
+                            <div class="w-4 h-4 border-2 border-current rounded-[3px] flex-shrink-0 opacity-90"></div>
+                            <span class="truncate">1:1 Square</span>
+                        </button>
+                        
+                        <button onclick="setRatio('16:9', 16/9)" class="ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
+                            <div class="w-5 h-3.5 border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span class="truncate">16:9 Landscape</span>
+                        </button>
+                        
+                        <button onclick="setRatio('9:16', 9/16)" class="ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
+                            <div class="w-3.5 h-5 border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span class="truncate">9:16 Vertical Story</span>
+                        </button>
+                        
+                        <button onclick="setRatio('4:3', 4/3)" class="ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0">
+                            <div class="w-[18px] h-[13.5px] border-2 border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                            <span class="truncate">4:3 Standard Frame</span>
+                        </button>
+                    </div>
+                </div>
 
-const miniPlaceholder = document.getElementById('mini-placeholder');
-const miniPreviewContainer = document.getElementById('mini-preview-container');
-const miniPreviewImg = document.getElementById('mini-preview-img');
-const miniBlurBg = document.getElementById('mini-blur-bg');
-const miniSolidBg = document.getElementById('mini-solid-bg');
+                <button id="fullscreen-btn" onclick="toggleFullscreen()" class="w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3">
+                    <div class="w-4 h-4 border-2 border-dashed border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
+                    <span class="truncate">Full Screen</span>
+                </button>
+            </section>
 
-let currentHue = 239;
-let currentSaturation = 80;
-let currentLightness = 66; 
+            <!-- RIGHT MODULE: VN CENTERED LIVE MONITOR VIEWPORT WINDOW (7 Columns) -->
+            <section class="lg:col-span-7 bg-black rounded-xl border border-white/[0.04] p-4 flex items-center justify-center relative overflow-hidden shadow-2xl">
+                <div class="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none"></div>
+                
+                <div id="upload-placeholder" class="z-10 text-center p-6 cursor-pointer transition-transform duration-300 hover:scale-105 select-none" onclick="document.getElementById('image-input').click()">
+                    <div class="mx-auto h-12 w-12 bg-white/[0.02] rounded-xl flex items-center justify-center border border-white/[0.08] mb-3 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Tap to Feed Monitor Pipeline</h3>
+                </div>
 
-uploadPlaceholder.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.add('scale-95'); });
-uploadPlaceholder.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); uploadPlaceholder.classList.remove('scale-95'); });
-uploadPlaceholder.addEventListener('drop', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    uploadPlaceholder.classList.remove('scale-95');
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
+                <div id="canvas-container" class="hidden relative shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-all duration-300 max-w-full max-h-full overflow-hidden rounded-lg border border-white/[0.08] flex items-center justify-center bg-[#09090b] pointer-events-auto">
+                    <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl transition-opacity duration-300 z-0 pointer-events-none"></div>
+                    <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0 pointer-events-none"></div>
+                    <img id="preview-img" src="" alt="Workspace Asset" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none">
+                </div>
+            </section>
 
-imageInput.addEventListener('change', (e) => {
-    if (e.target.files.length) handleFile(e.target.files[0]);
-});
+        </div>
 
-replacePhotoBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    imageInput.click();
-});
+        <!-- TIER 2: BASE ROW TIMELINE EDIT TRACK PARAMETER ENVIRONMENT Matrix -->
+        <div class="bg-[#141417] border border-white/[0.04] p-5 rounded-xl shadow-xl flex flex-col md:flex-row gap-6 items-center justify-between">
+            
+            <!-- LEFT LAYER: Live Track Miniature Map Overlay Vector Dashboard View -->
+            <div id="mini-preview-container-wrapper" class="flex-shrink-0 flex items-center justify-center">
+                <div id="mini-preview-container" class="w-[180px] h-[108px] relative overflow-hidden rounded-lg border border-white/[0.08] flex items-center justify-center bg-black/60 shadow-inner">
+                    <div id="mini-placeholder" class="z-20 text-center p-2">
+                        <span class="text-[8px] uppercase font-mono tracking-widest text-indigo-400 block opacity-50">Monitor Output</span>
+                        <span class="text-[10px] font-medium text-gray-600">Awaiting Track...</span>
+                    </div>
+                    <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 opacity-0 transition-opacity duration-300 z-0 pointer-events-none"></div>
+                    <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0 pointer-events-none"></div>
+                    <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative hidden transition-all duration-300 pointer-events-none">
+                </div>
+            </div>
 
-function handleFile(file) {
-    if (!file) return;
+            <!-- CENTER LAYER: Unified Variable Timeline Editing Control Modules -->
+            <div class="flex-grow w-full space-y-4">
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between border-b border-white/[0.04] pb-3">
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-gray-400">2. Track Composition Matrix</h2>
+                    
+                    <div class="grid grid-cols-2 gap-1.5 bg-black/40 p-1 rounded-xl border border-white/[0.02] w-full sm:w-auto">
+                        <button onclick="setBgType('blur')" id="bg-blur-btn" class="bg-indigo-500/10 border border-indigo-500/30 text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all">
+                            Blur Track
+                        </button>
+                        <button onclick="setBgType('solid')" id="bg-solid-btn" class="bg-transparent text-gray-400 hover:text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all">
+                            Chroma Track
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    <!-- Blur Profile Node Slider Layer -->
+                    <div id="blur-intensity-wrapper" class="space-y-2.5 bg-black/20 p-3.5 rounded-xl border border-white/[0.02]">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Blur Intensity</label>
+                            <span id="blur-val-display" class="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md font-bold">24px</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" id="blur-minus" class="w-8 h-8 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-lg text-xs select-none font-bold transition-all">-</button>
+                            <input type="range" id="blur-slider" min="0" max="100" value="24" class="flex-grow h-1.5 bg-white/[0.08] rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <button type="button" id="blur-plus" class="w-8 h-8 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-lg text-xs select-none font-bold transition-all">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Chroma Profile Vector Wheel Module Layer -->
+                    <div id="color-picker-wrapper" class="hidden opacity-0 flex flex-col sm:flex-row items-center gap-5 bg-black/20 p-3.5 rounded-xl border border-white/[0.02] transition-all duration-300">
+                        <div class="relative w-24 h-24 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-full border border-white/[0.08] bg-black">
+                            <canvas id="wheel-canvas" width="96" height="96" class="cursor-crosshair block w-full h-full"></canvas>
+                            <div id="wheel-cursor" class="absolute w-3 h-3 border border-white rounded-full shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                        </div>
+
+                        <div class="flex-grow w-full space-y-2.5">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Alpha Opacity</label>
+                                <span id="opacity-val" class="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md font-bold">100%</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" id="opacity-minus" class="w-8 h-8 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-lg text-xs select-none font-bold transition-all">-</button>
+                                <input type="range" id="opacity-slider" min="0" max="100" value="100" class="flex-grow h-1.5 bg-white/[0.08] rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                                <button type="button" id="opacity-plus" class="w-8 h-8 flex items-center justify-center bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-gray-300 rounded-lg text-xs select-none font-bold transition-all">+</button>
+                            </div>
+                            
+                            <div class="flex items-center gap-2.5 bg-black/40 px-3 py-2 rounded-lg border border-white/[0.04]">
+                                <div class="w-4 h-4 rounded-md border border-white/[0.1] shadow-inner flex-shrink-0" id="color-preview-patch" style="background-color: #6366f1;"></div>
+                                <input type="text" id="color-hex" value="#6366f1" class="bg-transparent text-[11px] font-mono text-gray-300 focus:outline-none w-full uppercase tracking-wider">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT LAYER: Dedicated Timeline Export Command Trigger Module -->
+            <div class="flex-shrink-0 w-full md:w-auto text-center space-y-1.5">
+                <button id="download-btn" disabled class="w-full md:w-[170px] bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-500/5 opacity-50 cursor-not-allowed text-[11px] uppercase tracking-wider transition-all select-none">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export Image
+                </button>
+                <p class="text-[9px] text-gray-600 font-mono tracking-tighter">LOCAL_RENDER_ACCEL</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-white/[0.03] px-6 py-3 text-center text-[9px] text-gray-600 font-mono tracking-wide bg-[#111114]">
+        &copy; 2026 Aethercore Interactive. Studio Engine Status: Synchronized.
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            nativeWidth = img.width;
-            nativeHeight = img.height;
-            currentImgSrc = event.target.result;
-            
-            uploadPlaceholder.classList.add('hidden');
-            canvasContainer.classList.remove('hidden');
-            
-            if (miniPlaceholder) miniPlaceholder.classList.add('hidden');
-            miniPreviewImg.classList.remove('hidden');
-            replacePhotoBtn.classList.remove('hidden');
-
-            downloadBtn.removeAttribute('disabled');
-            downloadBtn.disabled = false;
-            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-
-            previewImg.src = currentImgSrc;
-            miniPreviewImg.src = currentImgSrc;
-            blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
-            miniBlurBg.style.backgroundImage = `url('${currentImgSrc}')`;
-            
-            updateCanvasDimensions();
-            updateChromaBackground();
-
-            imageInput.value = '';
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-
-function setRatio(label, targetVal) {
-    ratioMode = label;
-    selectedRatio = targetVal;
-    ratioBadge.innerText = isFullscreen ? `${label} (Full Screen)` : label;
-
-    document.querySelectorAll('.ratio-btn').forEach(btn => {
-        btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
-        if(btn.innerText.includes(label)) {
-            btn.className = "ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
-        }
-    });
-
-    updateCanvasDimensions();
-}
-
-function toggleFullscreen() {
-    isFullscreen = !isFullscreen;
-
-    if (isFullscreen) {
-        fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
-        ratioBadge.innerText = `${ratioMode} (Full Screen)`;
-    } else {
-        fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
-        ratioBadge.innerText = ratioMode;
-    }
-
-    updateCanvasDimensions();
-}
-
-function setBgType(type) {
-    backgroundType = type;
-    const blurBtn = document.getElementById('bg-blur-btn');
-    const solidBtn = document.getElementById('bg-solid-btn');
-    const pickerWrapper = document.getElementById('color-picker-wrapper');
-
-    if (type === 'blur') {
-        blurBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
-        solidBtn.className = "bg-transparent text-gray-400 hover:text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
-        pickerWrapper.classList.add('hidden', 'opacity-0');
-        blurIntensityWrapper.classList.remove('hidden');
-        
-        blurBg.style.opacity = '1';
-        if (currentImgSrc) miniBlurBg.style.opacity = '1';
-        solidBg.style.backgroundColor = 'transparent';
-        miniSolidBg.style.backgroundColor = 'transparent';
-    } else {
-        solidBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
-        blurBtn.className = "bg-transparent text-gray-400 hover:text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
-        pickerWrapper.classList.remove('hidden');
-        blurIntensityWrapper.classList.add('hidden');
-        setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
-        
-        blurBg.style.opacity = '0';
-        miniBlurBg.style.opacity = '0';
-        drawColorWheel();
-        updateCursorPosition();
-        updateChromaBackground();
-    }
-}
-
-blurSlider.addEventListener('input', (e) => {
-    blurRadius = e.target.value;
-    blurValDisplay.innerText = `${blurRadius}px`;
-    blurBg.style.filter = `blur(${blurRadius}px)`;
-    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
-});
-
-blurMinus.addEventListener('click', () => {
-    let newVal = Math.max(0, parseInt(blurSlider.value) - 1);
-    blurSlider.value = newVal;
-    blurRadius = newVal;
-    blurValDisplay.innerText = `${blurRadius}px`;
-    blurBg.style.filter = `blur(${blurRadius}px)`;
-    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
-});
-
-blurPlus.addEventListener('click', () => {
-    let newVal = Math.min(100, parseInt(blurSlider.value) + 1);
-    blurSlider.value = newVal;
-    blurRadius = newVal;
-    blurValDisplay.innerText = `${blurRadius}px`;
-    blurBg.style.filter = `blur(${blurRadius}px)`;
-    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
-});
-
-function drawColorWheel() {
-    const ctx = wheelCanvas.getContext('2d');
-    const width = wheelCanvas.width;
-    const height = wheelCanvas.height;
-    const cx = width / 2;
-    const cy = height / 2;
-    const radius = (width / 2) - 1.5;
-
-    ctx.clearRect(0, 0, width, height);
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const dx = x - cx;
-            const dy = y - cy;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance <= radius) {
-                let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                if (angle < 0) angle += 360;
-
-                const saturation = (distance / radius) * 100;
-                ctx.fillStyle = `hsl(${angle}, ${saturation}%, 50%)`;
-                ctx.fillRect(x, y, 1, 1);
-            }
-        }
-    }
-}
-
-function handleWheelSelection(clientX, clientY) {
-    const rect = wheelCanvas.getBoundingClientRect();
-    let x = clientX - rect.left;
-    let y = clientY - rect.top;
-    
-    const cx = wheelCanvas.width / 2;
-    const cy = wheelCanvas.height / 2;
-    const dx = x - cx;
-    const dy = y - cy;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const radius = (wheelCanvas.width / 2) - 1.5;
-
-    if (distance <= radius) {
-        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-        if (angle < 0) angle += 360;
-
-        currentHue = angle;
-        currentSaturation = (distance / radius) * 100;
-        
-        wheelCursor.style.left = `${x}px` ;
-        wheelCursor.style.top = `${y}px`;
-    } else {
-        let angle = Math.atan2(dy, dx);
-        x = cx + Math.cos(angle) * radius;
-        y = cy + Math.sin(angle) * radius;
-        
-        let angleDeg = angle * (180 / Math.PI);
-        if (angleDeg < 0) angleDeg += 360;
-        
-        currentHue = angleDeg;
-        currentSaturation = 100;
-        
-        wheelCursor.style.left = `${x}px`;
-        wheelCursor.style.top = `${y}px`;
-    }
-    updateColorOutputs();
-}
-
-function updateCursorPosition() {
-    const cx = wheelCanvas.width / 2;
-    const cy = wheelCanvas.height / 2;
-    const radius = (wheelCanvas.width / 2) - 1.5;
-    const angleRad = currentHue * (Math.PI / 180);
-    const distance = (currentSaturation / 100) * radius;
-
-    const x = cx + Math.cos(angleRad) * distance;
-    const y = cy + Math.sin(angleRad) * distance;
-
-    wheelCursor.style.left = `${x}px`;
-    wheelCursor.style.top = `${y}px`;
-}
-
-wheelCanvas.addEventListener('mousedown', (e) => {
-    handleWheelSelection(e.clientX, e.clientY);
-    const onMouseMove = (moveEvent) => handleWheelSelection(moveEvent.clientX, moveEvent.clientY);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', () => {
-        window.removeEventListener('mousemove', onMouseMove);
-    }, { once: true });
-});
-
-wheelCanvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-        handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
-    }
-}, { passive: false });
-
-wheelCanvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-        handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
-    }
-}, { passive: false });
-
-opacitySlider.addEventListener('input', (e) => {
-    chromaOpacity = e.target.value / 100;
-    opacityVal.innerText = `${e.target.value}%`;
-    updateChromaBackground();
-});
-
-opacityMinus.addEventListener('click', () => {
-    let newVal = Math.max(0, parseInt(opacitySlider.value) - 1);
-    opacitySlider.value = newVal;
-    chromaOpacity = newVal / 100;
-    opacityVal.innerText = `${newVal}%`;
-    updateChromaBackground();
-});
-
-opacityPlus.addEventListener('click', () => {
-    let newVal = Math.min(100, parseInt(opacitySlider.value) + 1);
-    opacitySlider.value = newVal;
-    chromaOpacity = newVal / 100;
-    opacityVal.innerText = `${newVal}%`;
-    updateChromaBackground();
-});
-
-function updateColorOutputs() {
-    const tempElement = document.createElement('div');
-    tempElement.style.color = `hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`;
-    document.body.appendChild(tempElement);
-    const rgbString = window.getComputedStyle(tempElement).color;
-    document.body.removeChild(tempElement);
-
-    const rgbArr = rgbString.match(/\d+/g).map(Number);
-    const hex = "#" + rgbArr.map(x => {
-        const hexStr = x.toString(16);
-        return hexStr.length === 1 ? '0' + hexStr : hexStr;
-    }).join('');
-
-    chromaColor = hex;
-    colorHex.value = chromaColor;
-    updateChromaBackground();
-}
-
-function updateChromaBackground() {
-    const r = parseInt(chromaColor.slice(1, 3), 16);
-    const g = parseInt(chromaColor.slice(3, 5), 16);
-    const b = parseInt(chromaColor.slice(5, 7), 16);
-    const rgbaColor = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
-
-    colorPreviewPatch.style.backgroundColor = rgbaColor;
-    if (backgroundType === 'solid') {
-        solidBg.style.backgroundColor = rgbaColor;
-        miniSolidBg.style.backgroundColor = rgbaColor;
-    }
-}
-
-colorHex.addEventListener('input', (e) => {
-    if(e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-        chromaColor = e.target.value;
-        
-        const r = parseInt(chromaColor.slice(1, 3), 16) / 255;
-        const g = parseInt(chromaColor.slice(3, 5), 16) / 255;
-        const b = parseInt(chromaColor.slice(5, 7), 16) / 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
-        let h, s, l = (max + min) / 2;
-
-        if (max === min) {
-            h = s = 0;
-        } else {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch (max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
-            }
-            h /= 6;
-        }
-        
-        currentHue = h * 360;
-        currentSaturation = s * 100;
-        currentLightness = l * 100;
-
-        updateCursorPosition();
-        updateChromaBackground();
-    }
-});
-
-function updateCanvasDimensions() {
-    if (!currentImgSrc) return;
-
-    let finalRatio = selectedRatio;
-
-    const viewportWidth = Math.min(window.innerWidth * 0.9, 650);
-    const viewportHeight = window.innerHeight * 0.55;
-
-    let targetWidth = viewportWidth;
-    let targetHeight = targetWidth / finalRatio;
-
-    if (targetHeight > viewportHeight) {
-        targetHeight = viewportHeight;
-        targetWidth = targetHeight * finalRatio;
-    }
-
-    canvasContainer.style.width = `${targetWidth}px`;
-    canvasContainer.style.height = `${targetHeight}px`;
-
-    if (isFullscreen) {
-        previewImg.className = "w-full h-full object-cover z-10 relative transition-all duration-300 pointer-events-none";
-        miniPreviewImg.className = "w-full h-full object-cover z-10 relative transition-all duration-300 pointer-events-none hidden";
-        miniPreviewImg.classList.remove('hidden');
-    } else {
-        previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none hidden";
-        miniPreviewImg.classList.remove('hidden');
-    }
-
-    const maxMiniW = 180;
-    const maxMiniH = 108;
-    let miniWidth = maxMiniW;
-    let miniHeight = miniWidth / finalRatio;
-
-    if (miniHeight > maxMiniH) {
-        miniHeight = maxMiniH;
-        miniWidth = miniHeight * finalRatio;
-    }
-
-    miniPreviewContainer.style.width = `${miniWidth}px`;
-    miniPreviewContainer.style.height = `${miniHeight}px`;
-
-    blurBg.style.filter = `blur(${blurRadius}px)`;
-    miniBlurBg.style.filter = `blur(${blurRadius}px)`;
-    
-    if (backgroundType === 'blur') {
-        blurBg.style.opacity = '1';
-        miniBlurBg.style.opacity = '1';
-    }
-}
-
-downloadBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!currentImgSrc || downloadBtn.disabled) return;
-
-    const exportCanvas = document.createElement('canvas');
-    const ctx = exportCanvas.getContext('2d');
-
-    let finalRatio = selectedRatio;
-    let outWidth = nativeWidth;
-    let outHeight = nativeWidth / finalRatio;
-
-    if (outHeight < nativeHeight) {
-        outHeight = nativeHeight;
-        outWidth = outHeight * finalRatio;
-    }
-
-    exportCanvas.width = outWidth;
-    exportCanvas.height = outHeight;
-
-    const baseImg = new Image();
-    baseImg.onload = () => {
-        if (backgroundType === 'solid') {
-            const r = parseInt(chromaColor.slice(1, 3), 16);
-            const g = parseInt(chromaColor.slice(3, 5), 16);
-            const b = parseInt(chromaColor.slice(5, 7), 16);
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${chromaOpacity})`;
-            ctx.fillRect(0, 0, outWidth, outHeight);
-            renderForegroundAsset();
-        } else {
-            ctx.filter = `blur(${blurRadius}px)`;
-            
-            let bgWidth = outWidth;
-            let bgHeight = (outWidth / nativeWidth) * nativeHeight;
-            
-            if (bgHeight < outHeight) {
-                bgHeight = outHeight;
-                bgWidth = (outHeight / nativeHeight) * nativeWidth;
-            }
-            
-            const bgX = (outWidth - bgWidth) / 2;
-            const bgY = (outHeight - bgHeight) / 2;
-            
-            ctx.drawImage(baseImg, bgX - 55, bgY - 55, bgWidth + 110, bgHeight + 110);
-            ctx.filter = 'none';
-            
-            ctx.fillStyle = "rgba(0,0,0,0.15)";
-            ctx.fillRect(0, 0, outWidth, outHeight);
-
-            renderForegroundAsset();
-        }
-
-        function renderForegroundAsset() {
-            if (isFullscreen) {
-                let imgRatio = nativeWidth / nativeHeight;
-                let renderW = outWidth;
-                let renderH = outWidth / imgRatio;
-
-                if (renderH < outHeight) {
-                    renderH = outHeight;
-                    renderW = outHeight * imgRatio;
-                }
-
-                const fgX = (outWidth - renderW) / 2;
-                const fgY = (outHeight - renderH) / 2;
-                ctx.drawImage(baseImg, fgX, fgY, renderW, renderH);
-            } else {
-                const fgX = (outWidth - nativeWidth) / 2;
-                const fgY = (outHeight - nativeHeight) / 2;
-                ctx.drawImage(baseImg, fgX, fgY, nativeWidth, nativeHeight);
-            }
-
-            const link = document.createElement('a');
-            link.download = 'scale-forge-export.png';
-            link.href = exportCanvas.toDataURL('image/png');
-            link.click();
-        }
-    };
-    baseImg.src = currentImgSrc;
-});
