@@ -3,6 +3,7 @@ let nativeWidth = 0;
 let nativeHeight = 0;
 let selectedRatio = 1; 
 let ratioMode = '1:1';
+let isFullscreen = false;
 let backgroundType = 'blur'; 
 let chromaColor = '#6366f1';
 let chromaOpacity = 1;
@@ -101,7 +102,7 @@ function handleFile(file) {
 function setRatio(label, targetVal) {
     ratioMode = label;
     selectedRatio = targetVal;
-    ratioBadge.innerText = label;
+    ratioBadge.innerText = isFullscreen ? `${label} (Full Screen)` : label;
 
     document.querySelectorAll('.ratio-btn').forEach(btn => {
         btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
@@ -110,10 +111,18 @@ function setRatio(label, targetVal) {
         }
     });
 
-    if (label === 'Fullscreen') {
+    updateCanvasDimensions();
+}
+
+function toggleFullscreen() {
+    isFullscreen = !isFullscreen;
+
+    if (isFullscreen) {
         fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+        ratioBadge.innerText = `${ratioMode} (Full Screen)`;
     } else {
         fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+        ratioBadge.innerText = ratioMode;
     }
 
     updateCanvasDimensions();
@@ -367,10 +376,6 @@ function updateCanvasDimensions() {
     if (!currentImgSrc) return;
 
     let finalRatio = selectedRatio;
-    if (selectedRatio === 'full') {
-        finalRatio = nativeWidth / nativeHeight;
-        ratioBadge.innerText = `Full (${nativeWidth}:${nativeHeight})`;
-    }
 
     const viewportWidth = Math.min(window.innerWidth * 0.9, 650);
     const viewportHeight = window.innerHeight * 0.55;
@@ -385,6 +390,16 @@ function updateCanvasDimensions() {
 
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
+
+    if (isFullscreen) {
+        previewImg.className = "w-full h-full object-cover z-10 relative transition-all duration-300 pointer-events-none";
+        miniPreviewImg.className = "w-full h-full object-cover z-10 relative transition-all duration-300 pointer-events-none hidden";
+        miniPreviewImg.classList.remove('hidden');
+    } else {
+        previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
+        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none hidden";
+        miniPreviewImg.classList.remove('hidden');
+    }
 
     const maxMiniW = 180;
     const maxMiniH = 108;
@@ -416,8 +431,6 @@ downloadBtn.addEventListener('click', (e) => {
     const ctx = exportCanvas.getContext('2d');
 
     let finalRatio = selectedRatio;
-    if (selectedRatio === 'full') finalRatio = nativeWidth / nativeHeight;
-
     let outWidth = nativeWidth;
     let outHeight = nativeWidth / finalRatio;
 
@@ -462,9 +475,24 @@ downloadBtn.addEventListener('click', (e) => {
         }
 
         function renderForegroundAsset() {
-            const fgX = (outWidth - nativeWidth) / 2;
-            const fgY = (outHeight - nativeHeight) / 2;
-            ctx.drawImage(baseImg, fgX, fgY, nativeWidth, nativeHeight);
+            if (isFullscreen) {
+                let imgRatio = nativeWidth / nativeHeight;
+                let renderW = outWidth;
+                let renderH = outWidth / imgRatio;
+
+                if (renderH < outHeight) {
+                    renderH = outHeight;
+                    renderW = outHeight * imgRatio;
+                }
+
+                const fgX = (outWidth - renderW) / 2;
+                const fgY = (outHeight - renderH) / 2;
+                ctx.drawImage(baseImg, fgX, fgY, renderW, renderH);
+            } else {
+                const fgX = (outWidth - nativeWidth) / 2;
+                const fgY = (outHeight - nativeHeight) / 2;
+                ctx.drawImage(baseImg, fgX, fgY, nativeWidth, nativeHeight);
+            }
 
             const link = document.createElement('a');
             link.download = 'scale-forge-export.png';
@@ -474,3 +502,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
+    
