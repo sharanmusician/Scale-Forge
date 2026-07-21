@@ -68,9 +68,9 @@
                     </div>
                 </div>
 
-                <button id="fullscreen-btn" onclick="setRatio('Fullscreen', 'full')" class="w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3">
+                <button id="fullscreen-btn" onclick="toggleFullscreen()" class="w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3">
                     <div class="w-4 h-4 border-2 border-dashed border-current rounded-[3px] flex-shrink-0 opacity-70"></div>
-                    <span class="truncate">Match Native Source File Dimensions</span>
+                    <span class="truncate">Full Screen</span>
                 </button>
             </section>
 
@@ -88,7 +88,7 @@
                 <div id="canvas-container" class="hidden relative shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-all duration-300 max-w-full max-h-full overflow-hidden rounded-lg border border-white/[0.08] flex items-center justify-center bg-[#09090b] pointer-events-auto">
                     <div id="blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl transition-opacity duration-300 z-0 pointer-events-none"></div>
                     <div id="solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0 pointer-events-none"></div>
-                    <img id="preview-img" src="" alt="Workspace Asset" class="max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none">
+                    <img id="preview-img" src="" alt="Workspace Asset" class="transition-all duration-300 pointer-events-none">
                 </div>
             </section>
 
@@ -106,7 +106,7 @@
                     </div>
                     <div id="mini-blur-bg" class="absolute inset-0 bg-cover bg-center scale-110 opacity-0 transition-opacity duration-300 z-0 pointer-events-none"></div>
                     <div id="mini-solid-bg" class="absolute inset-0 bg-transparent transition-colors duration-300 z-0 pointer-events-none"></div>
-                    <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="max-w-full max-h-full object-contain z-10 relative hidden transition-all duration-300 pointer-events-none">
+                    <img id="mini-preview-img" src="" alt="Mini Preview Frame" class="transition-all duration-300 pointer-events-none hidden">
                 </div>
             </div>
 
