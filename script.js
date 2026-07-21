@@ -12,14 +12,12 @@ let blurRadius = 24;
 let panOffsetX = 0;
 let panOffsetY = 0;
 let currentZoom = 1;
-let minZoom = 1;
-let maxZoom = 5;
 let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-let initialPinchDistance = 0;
-let initialPinchZoom = 1;
+let initialPinchDist = 0;
+let initialZoom = 1;
 
 const imageInput = document.getElementById('image-input');
 const uploadPlaceholder = document.getElementById('upload-placeholder');
@@ -394,29 +392,26 @@ colorHex.addEventListener('input', (e) => {
     }
 });
 
-function constrainTransform() {
+function applyTransform() {
+    if (!isFullscreen) {
+        previewImg.style.transform = 'none';
+        return;
+    }
     const containerRect = canvasContainer.getBoundingClientRect();
     const imgRect = previewImg.getBoundingClientRect();
     
-    const currentRenderWidth = (imgRect.width / currentZoom);
-    const currentRenderHeight = (imgRect.height / currentZoom);
+    const baseW = imgRect.width / currentZoom;
+    const baseH = imgRect.height / currentZoom;
+    const scaledW = baseW * currentZoom;
+    const scaledH = baseH * currentZoom;
 
-    const scaledWidth = currentRenderWidth * currentZoom;
-    const scaledHeight = currentRenderHeight * currentZoom;
-
-    const maxOffsetX = Math.max(0, (scaledWidth - containerRect.width) / 2);
-    const maxOffsetY = Math.max(0, (scaledHeight - containerRect.height) / 2);
+    const maxOffsetX = Math.max(0, (scaledW - containerRect.width) / 2);
+    const maxOffsetY = Math.max(0, (scaledH - containerRect.height) / 2);
 
     panOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, panOffsetX));
     panOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, panOffsetY));
-}
 
-function updateTransform() {
-    if (isFullscreen) {
-        previewImg.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px) scale(${currentZoom})`;
-    } else {
-        previewImg.style.transform = 'none';
-    }
+    previewImg.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px) scale(${currentZoom})`;
 }
 
 function updateCanvasDimensions() {
@@ -442,8 +437,7 @@ function updateCanvasDimensions() {
         previewImg.className = "w-full h-full object-cover z-10 relative transition-none pointer-events-auto cursor-grab active:cursor-grabbing";
         miniPreviewImg.className = "w-full h-full object-cover z-10 relative transition-none pointer-events-none hidden";
         miniPreviewImg.classList.remove('hidden');
-        constrainTransform();
-        updateTransform();
+        applyTransform();
     } else {
         previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
         miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none hidden";
@@ -487,8 +481,7 @@ window.addEventListener('mousemove', (e) => {
     panOffsetX = e.clientX - startX;
     panOffsetY = e.clientY - startY;
 
-    constrainTransform();
-    updateTransform();
+    applyTransform();
 });
 
 window.addEventListener('mouseup', () => {
@@ -500,17 +493,30 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Touch support for mobile devices (Pan and Pinch-to-Zoom)
+// Prevent default pinch-to-zoom on the entire page/document, handling container-specific scaling safely
+document.addEventListener('gesturestart', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('gesturechange', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('gestureend', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
+// Touch support for mobile devices (Pan and Pinch-to-Zoom restricted to canvasContainer)
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
     if (e.touches.length === 2) {
         isDragging = false;
-        initialPinchDistance = Math.hypot(
+        initialPinchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
         );
-        initialPinchZoom = currentZoom;
+        initialZoom = currentZoom;
     } else if (e.touches.length === 1) {
         isDragging = true;
         startX = e.touches[0].clientX - panOffsetX;
@@ -521,32 +527,24 @@ canvasContainer.addEventListener('touchstart', (e) => {
 window.addEventListener('touchmove', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
 
-    if (e.touches.length === 2 && initialPinchDistance > 0) {
-        const currentDistance = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-        );
-        const scaleFactor = currentDistance / initialPinchDistance;
-        currentZoom = Math.max(minZoom, Math.min(maxZoom, initialPinchZoom * scaleFactor));
-        
-        constrainTransform();
-        updateTransform();
+    if (e.touches.length === 2) {
+        e.preventDefault();
+        if (initialPinchDist > 0) {
+            const currentDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scaleFactor = currentDist / initialPinchDist;
+            currentZoom = Math.max(1, Math.min(5, initialZoom * scaleFactor));
+            
+            applyTransform();
+        }
     } else if (isDragging && e.touches.length === 1) {
         panOffsetX = e.touches[0].clientX - startX;
         panOffsetY = e.touches[0].clientY - startY;
 
-        constrainTransform();
-        updateTransform();
+        applyTransform();
     }
-}, { passive: true });
+}, { passive: false });
 
-window.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-        initialPinchDistance = 0;
-    }
-    if (e.touches.length === 0) {
-        isDragging = false;
-    }
-});
-
-downloadBtn.addEventListen
+window.addEventL
