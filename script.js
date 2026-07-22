@@ -491,7 +491,7 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Universally prevent browser pinch-to-zoom gestures across the page via gesture events
+// Universally block pinch-to-zoom gestures across the entire website at all times
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -504,7 +504,14 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// Restrict custom pinch-to-zoom and pan interactions ONLY to the canvasContainer (preview screen)
+// Prevent multi-touch pinch-to-zoom anywhere outside the canvas container
+document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 1 && !canvasContainer.contains(e.target)) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Canvas Container touch support for multi-touch pinch-to-zoom and single-finger pan
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
@@ -538,12 +545,4 @@ canvasContainer.addEventListener('touchmove', (e) => {
             
             applyTransform();
         }
-    } else if (isDragging && e.touches.length === 1) {
-        panOffsetX = e.touches[0].clientX - startX;
-        panOffsetY = e.touches[0].clientY - startY;
-
-        applyTransform();
-    }
-}, { passive: false });
-
-window.addEventListener('touchend',
+    } else if (isD
