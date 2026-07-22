@@ -504,7 +504,7 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// Only intercept two-finger touch gestures for the full-screen image viewer; leave all other touches and clicks fully unblocked
+// Restrict custom pinch-to-zoom and pan interactions ONLY to the canvasContainer (preview screen)
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
@@ -523,7 +523,7 @@ canvasContainer.addEventListener('touchstart', (e) => {
     }
 }, { passive: false });
 
-window.addEventListener('touchmove', (e) => {
+canvasContainer.addEventListener('touchmove', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
 
     if (e.touches.length === 2) {
@@ -546,4 +546,4 @@ window.addEventListener('touchmove', (e) => {
     }
 }, { passive: false });
 
-window.addEven
+window.addEventListener('touchend',
