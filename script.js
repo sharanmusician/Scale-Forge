@@ -493,7 +493,7 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Prevent default pinch-to-zoom on the entire page/document, handling container-specific scaling safely
+// Universally lock document and webpage scaling against pinch/gesture zooming
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -506,11 +506,18 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
+document.addEventListener('touchmove', (e) => {
+    if (e.scale && e.scale !== 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
 // Touch support for mobile devices (Pan and Pinch-to-Zoom restricted to canvasContainer)
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
     if (e.touches.length === 2) {
+        e.preventDefault();
         isDragging = false;
         initialPinchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -522,7 +529,7 @@ canvasContainer.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX - panOffsetX;
         startY = e.touches[0].clientY - panOffsetY;
     }
-}, { passive: true });
+}, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
@@ -540,11 +547,4 @@ window.addEventListener('touchmove', (e) => {
             applyTransform();
         }
     } else if (isDragging && e.touches.length === 1) {
-        panOffsetX = e.touches[0].clientX - startX;
-        panOffsetY = e.touches[0].clientY - startY;
-
-        applyTransform();
-    }
-}, { passive: false });
-
-window.addEventL
+        panOffsetX = e.touches[0
