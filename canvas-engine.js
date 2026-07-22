@@ -1,3 +1,110 @@
+function handleFile(file) {
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            nativeWidth = img.width;
+            nativeHeight = img.height;
+            currentImgSrc = event.target.result;
+            
+            panOffsetX = 0;
+            panOffsetY = 0;
+            currentZoom = 1;
+
+            uploadPlaceholder.classList.add('hidden');
+            canvasContainer.classList.remove('hidden');
+            
+            if (miniPlaceholder) miniPlaceholder.classList.add('hidden');
+            miniPreviewImg.classList.remove('hidden');
+            replacePhotoBtn.classList.remove('hidden');
+
+            downloadBtn.removeAttribute('disabled');
+            downloadBtn.disabled = false;
+            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            previewImg.src = currentImgSrc;
+            miniPreviewImg.src = currentImgSrc;
+            blurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+            miniBlurBg.style.backgroundImage = `url('${currentImgSrc}')`;
+            
+            updateCanvasDimensions();
+            updateChromaBackground();
+
+            imageInput.value = '';
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function setRatio(label, targetVal) {
+    ratioMode = label;
+    selectedRatio = targetVal;
+    ratioBadge.innerText = isFullscreen ? `${label} (Full Screen)` : label;
+    panOffsetX = 0;
+    panOffsetY = 0;
+    currentZoom = 1;
+
+    document.querySelectorAll('.ratio-btn').forEach(btn => {
+        btn.className = "ratio-btn w-full h-[54px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
+        if(btn.innerText.includes(label)) {
+            btn.className = "ratio-btn w-full h-[54px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-left flex-shrink-0";
+        }
+    });
+
+    updateCanvasDimensions();
+}
+
+function toggleFullscreen() {
+    isFullscreen = !isFullscreen;
+    panOffsetX = 0;
+    panOffsetY = 0;
+    currentZoom = 1;
+
+    if (isFullscreen) {
+        fullscreenBtn.className = "w-full h-[50px] bg-indigo-500/10 border border-indigo-500 text-white px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+        ratioBadge.innerText = `${ratioMode} (Full Screen)`;
+    } else {
+        fullscreenBtn.className = "w-full h-[50px] bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04] px-4 rounded-xl flex items-center justify-center gap-3 text-xs font-medium transition-all flex-shrink-0 mt-3";
+        ratioBadge.innerText = ratioMode;
+    }
+
+    updateCanvasDimensions();
+}
+
+function setBgType(type) {
+    backgroundType = type;
+    const blurBtn = document.getElementById('bg-blur-btn');
+    const solidBtn = document.getElementById('bg-solid-btn');
+    const pickerWrapper = document.getElementById('color-picker-wrapper');
+
+    if (type === 'blur') {
+        blurBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
+        solidBtn.className = "bg-transparent text-gray-400 hover:text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
+        pickerWrapper.classList.add('hidden', 'opacity-0');
+        blurIntensityWrapper.classList.remove('hidden');
+        
+        blurBg.style.opacity = '1';
+        if (currentImgSrc) miniBlurBg.style.opacity = '1';
+        solidBg.style.backgroundColor = 'transparent';
+        miniSolidBg.style.backgroundColor = 'transparent';
+    } else {
+        solidBtn.className = "bg-indigo-500/10 border border-indigo-500/30 text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
+        blurBtn.className = "bg-transparent text-gray-400 hover:text-white px-5 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-2 transition-all";
+        pickerWrapper.classList.remove('hidden');
+        blurIntensityWrapper.classList.add('hidden');
+        setTimeout(() => pickerWrapper.classList.remove('opacity-0'), 10);
+        
+        blurBg.style.opacity = '0';
+        miniBlurBg.style.opacity = '0';
+        drawColorWheel();
+        updateCursorPosition();
+        updateChromaBackground();
+    }
+}
+
 blurSlider.addEventListener('input', (e) => {
     blurRadius = e.target.value;
     blurValDisplay.innerText = `${blurRadius}px`;
@@ -210,10 +317,6 @@ colorHex.addEventListener('input', (e) => {
 });
 
 function applyTransform() {
-    if (!isFullscreen) {
-        previewImg.style.transform = 'none';
-        return;
-    }
     const containerRect = canvasContainer.getBoundingClientRect();
     const imgRect = previewImg.getBoundingClientRect();
     
@@ -250,15 +353,9 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    if (isFullscreen) {
-        previewImg.className = "w-full h-full object-cover z-10 relative transition-none pointer-events-auto cursor-grab active:cursor-grabbing";
-        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        applyTransform();
-    } else {
-        previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        previewImg.style.transform = 'none';
-    }
+    previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
+    miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
+    applyTransform();
 
     const maxMiniW = 180;
     const maxMiniH = 108;
@@ -282,31 +379,6 @@ function updateCanvasDimensions() {
     }
 }
 
-previewImg.addEventListener('mousedown', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
-    isDragging = true;
-    startX = e.clientX - panOffsetX;
-    startY = e.clientY - panOffsetY;
-    previewImg.style.cursor = 'grabbing';
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (!isDragging || !isFullscreen) return;
-    panOffsetX = e.clientX - startX;
-    panOffsetY = e.clientY - startY;
-
-    applyTransform();
-});
-
-window.addEventListener('mouseup', () => {
-    if (isDragging) {
-        isDragging = false;
-        if (isFullscreen && currentImgSrc) {
-            previewImg.style.cursor = 'grab';
-        }
-    }
-});
-
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -326,11 +398,10 @@ document.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 canvasContainer.addEventListener('touchstart', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
+    if (!currentImgSrc) return;
     
     if (e.touches.length === 2) {
         e.preventDefault();
-        isDragging = false;
         initialPinchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
@@ -340,15 +411,11 @@ canvasContainer.addEventListener('touchstart', (e) => {
         initialPanY = panOffsetY;
         pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    } else if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX - panOffsetX;
-        startY = e.touches[0].clientY - panOffsetY;
     }
 }, { passive: false });
 
 canvasContainer.addEventListener('touchmove', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
+    if (!currentImgSrc) return;
 
     if (e.touches.length === 2) {
         e.preventDefault();
@@ -371,20 +438,12 @@ canvasContainer.addEventListener('touchmove', (e) => {
             
             applyTransform();
         }
-    } else if (isDragging && e.touches.length === 1) {
-        panOffsetX = e.touches[0].clientX - startX;
-        panOffsetY = e.touches[0].clientY - startY;
-
-        applyTransform();
     }
 }, { passive: false });
 
 window.addEventListener('touchend', (e) => {
     if (e.touches.length < 2) {
         initialPinchDist = 0;
-    }
-    if (e.touches.length === 0) {
-        isDragging = false;
     }
 }, { passive: true });
 
@@ -419,4 +478,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-      
+        
