@@ -491,7 +491,7 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Universally lock document and webpage scaling against pinch/gesture zooming via iOS Safari gesture events
+// Universally prevent browser pinch-to-zoom gestures across the page via gesture events
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -504,7 +504,7 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// Touch support for mobile devices: Allow normal button/slider taps, restrict image zoom/pan strictly to full-screen mode
+// Only intercept two-finger touch gestures for the full-screen image viewer; leave all other touches and clicks fully unblocked
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
@@ -546,43 +546,4 @@ window.addEventListener('touchmove', (e) => {
     }
 }, { passive: false });
 
-window.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-        initialPinchDist = 0;
-    }
-    if (e.touches.length === 0) {
-        isDragging = false;
-    }
-}, { passive: true });
-
-downloadBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!currentImgSrc || downloadBtn.disabled) return;
-
-    const exportCanvas = document.createElement('canvas');
-    const ctx = exportCanvas.getContext('2d');
-
-    let finalRatio = selectedRatio;
-    let outWidth = nativeWidth;
-    let outHeight = nativeWidth / finalRatio;
-
-    if (outHeight < nativeHeight) {
-        outHeight = nativeHeight;
-        outWidth = outHeight * finalRatio;
-    }
-
-    exportCanvas.width = outWidth;
-    exportCanvas.height = outHeight;
-
-    const baseImg = new Image();
-    baseImg.onload = () => {
-        if (backgroundType === 'solid') {
-            const r = parseInt(chromaColor.slice(1, 3), 16);
-            const g = parseInt(chromaColor.slice(3, 5), 16);
-            const b = parseInt(chromaColor.slice(5, 7), 16);
-            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-        }
-    };
-    baseImg.src = currentImgSrc;
-});
+window.addEven
