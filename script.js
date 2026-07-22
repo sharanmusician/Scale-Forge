@@ -18,6 +18,10 @@ let startY = 0;
 
 let initialPinchDist = 0;
 let initialZoom = 1;
+let initialPanX = 0;
+let initialPanY = 0;
+let pinchMidX = 0;
+let pinchMidY = 0;
 
 const imageInput = document.getElementById('image-input');
 const uploadPlaceholder = document.getElementById('upload-placeholder');
@@ -504,14 +508,13 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// Prevent multi-touch pinch-to-zoom anywhere outside the canvas container
 document.addEventListener('touchmove', (e) => {
     if (e.touches.length > 1 && !canvasContainer.contains(e.target)) {
         e.preventDefault();
     }
 }, { passive: false });
 
-// Canvas Container touch support for multi-touch pinch-to-zoom and single-finger pan
+// Canvas Container touch support for combined 2-finger pinch-to-zoom and two-finger pan
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
@@ -523,6 +526,10 @@ canvasContainer.addEventListener('touchstart', (e) => {
             e.touches[0].clientY - e.touches[1].clientY
         );
         initialZoom = currentZoom;
+        initialPanX = panOffsetX;
+        initialPanY = panOffsetY;
+        pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
     } else if (e.touches.length === 1) {
         isDragging = true;
         startX = e.touches[0].clientX - panOffsetX;
@@ -539,10 +546,4 @@ canvasContainer.addEventListener('touchmove', (e) => {
             const currentDist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
                 e.touches[0].clientY - e.touches[1].clientY
-            );
-            const scaleFactor = currentDist / initialPinchDist;
-            currentZoom = Math.max(1, Math.min(5, initialZoom * scaleFactor));
-            
-            applyTransform();
-        }
-    } else if (isD
+           
