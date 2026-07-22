@@ -12,6 +12,9 @@ let blurRadius = 24;
 let panOffsetX = 0;
 let panOffsetY = 0;
 let currentZoom = 1;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
 
 let initialPinchDist = 0;
 let initialZoom = 1;
@@ -178,4 +181,4 @@ function setBgType(type) {
         updateCursorPosition();
         updateChromaBackground();
     }
-}
+    }
