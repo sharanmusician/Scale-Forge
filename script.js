@@ -532,7 +532,12 @@ canvasContainer.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
+    if (!isFullscreen || !currentImgSrc) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+        return;
+    }
 
     if (e.touches.length === 2) {
         e.preventDefault();
@@ -545,6 +550,4 @@ window.addEventListener('touchmove', (e) => {
             currentZoom = Math.max(1, Math.min(5, initialZoom * scaleFactor));
             
             applyTransform();
-        }
-    } else if (isDragging && e.touches.length === 1) {
-        panOffsetX = e.touches[0
+   
