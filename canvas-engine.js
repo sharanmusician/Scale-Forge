@@ -285,7 +285,7 @@ document.addEventListener('gestureend', (e) => {
 }, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
-    if (!canvasContainer.contains(e.target)) {
+    if (e.touches.length > 1 && !canvasContainer.contains(e.target)) {
         e.preventDefault();
     }
 }, { passive: false });
@@ -331,9 +331,6 @@ canvasContainer.addEventListener('touchmove', (e) => {
             
             applyTransform();
         }
-    } else if (e.touches.length === 1) {
-        // Prevent single-finger dragging/scrolling completely inside the preview container
-        e.preventDefault();
     }
 }, { passive: false });
 
