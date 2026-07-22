@@ -294,18 +294,16 @@ wheelCanvas.addEventListener('mousedown', (e) => {
 });
 
 wheelCanvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
     if (e.touches.length === 1) {
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
-}, { passive: false });
+}, { passive: true });
 
 wheelCanvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
     if (e.touches.length === 1) {
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
-}, { passive: false });
+}, { passive: true });
 
 opacitySlider.addEventListener('input', (e) => {
     chromaOpacity = e.target.value / 100;
@@ -493,7 +491,7 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Universally lock document and webpage scaling against pinch/gesture zooming
+// Universally lock document and webpage scaling against pinch/gesture zooming via iOS Safari gesture events
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -506,13 +504,7 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-document.addEventListener('touchmove', (e) => {
-    if (e.scale && e.scale !== 1) {
-        e.preventDefault();
-    }
-}, { passive: false });
-
-// Touch support for mobile devices (Pan and Pinch-to-Zoom restricted to canvasContainer)
+// Touch support for mobile devices: Allow normal button/slider taps, restrict image zoom/pan strictly to full-screen mode
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!isFullscreen || !currentImgSrc) return;
     
@@ -532,12 +524,7 @@ canvasContainer.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
-    if (!isFullscreen || !currentImgSrc) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
-        return;
-    }
+    if (!isFullscreen || !currentImgSrc) return;
 
     if (e.touches.length === 2) {
         e.preventDefault();
@@ -550,4 +537,52 @@ window.addEventListener('touchmove', (e) => {
             currentZoom = Math.max(1, Math.min(5, initialZoom * scaleFactor));
             
             applyTransform();
-   
+        }
+    } else if (isDragging && e.touches.length === 1) {
+        panOffsetX = e.touches[0].clientX - startX;
+        panOffsetY = e.touches[0].clientY - startY;
+
+        applyTransform();
+    }
+}, { passive: false });
+
+window.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDist = 0;
+    }
+    if (e.touches.length === 0) {
+        isDragging = false;
+    }
+}, { passive: true });
+
+downloadBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!currentImgSrc || downloadBtn.disabled) return;
+
+    const exportCanvas = document.createElement('canvas');
+    const ctx = exportCanvas.getContext('2d');
+
+    let finalRatio = selectedRatio;
+    let outWidth = nativeWidth;
+    let outHeight = nativeWidth / finalRatio;
+
+    if (outHeight < nativeHeight) {
+        outHeight = nativeHeight;
+        outWidth = outHeight * finalRatio;
+    }
+
+    exportCanvas.width = outWidth;
+    exportCanvas.height = outHeight;
+
+    const baseImg = new Image();
+    baseImg.onload = () => {
+        if (backgroundType === 'solid') {
+            const r = parseInt(chromaColor.slice(1, 3), 16);
+            const g = parseInt(chromaColor.slice(3, 5), 16);
+            const b = parseInt(chromaColor.slice(5, 7), 16);
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        }
+    };
+    baseImg.src = currentImgSrc;
+});
