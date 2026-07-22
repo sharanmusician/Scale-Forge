@@ -75,3 +75,4 @@ replacePhotoBtn.addEventListener('click', (e) => {
     e.preventDefault();
     imageInput.click();
 });
+    
