@@ -1,4 +1,4 @@
-let currentImgSrc = '';
+Let currentImgSrc = '';
 let nativeWidth = 0;
 let nativeHeight = 0;
 let selectedRatio = 1; 
@@ -12,6 +12,9 @@ let blurRadius = 24;
 let panOffsetX = 0;
 let panOffsetY = 0;
 let currentZoom = 1;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
 
 let initialPinchDist = 0;
 let initialZoom = 1;
@@ -117,7 +120,7 @@ function handleFile(file) {
 function setRatio(label, targetVal) {
     ratioMode = label;
     selectedRatio = targetVal;
-    ratioBadge.innerText = label;
+    ratioBadge.innerText = isFullscreen ? `${label} (Full Screen)` : label;
     panOffsetX = 0;
     panOffsetY = 0;
     currentZoom = 1;
@@ -178,4 +181,7 @@ function setBgType(type) {
         updateCursorPosition();
         updateChromaBackground();
     }
-    }
+}
+
+
+This is script
