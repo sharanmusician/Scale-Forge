@@ -233,13 +233,16 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
+    // Ensure flex centering and zero baseline gaps for preview image container wrappers
+    canvasContainer.className = "relative overflow-hidden rounded-2xl shadow-2xl flex items-center justify-center bg-black/40 border border-white/10 select-none";
+
     if (isFullscreen) {
-        previewImg.className = "w-full h-full object-cover z-10 relative pointer-events-auto cursor-grab active:cursor-grabbing";
+        previewImg.className = "w-full h-full object-cover z-10 relative pointer-events-auto cursor-grab active:cursor-grabbing block";
     } else {
-        previewImg.className = "max-w-full max-h-full object-contain z-10 relative pointer-events-none";
+        previewImg.className = "max-w-full max-h-full object-contain z-10 relative pointer-events-none block";
     }
     
-    miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
+    miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none block";
     applyTransform();
 
     const maxMiniW = 180;
@@ -368,3 +371,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
+                    
