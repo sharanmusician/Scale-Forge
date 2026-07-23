@@ -114,15 +114,17 @@ wheelCanvas.addEventListener('mousedown', (e) => {
 
 wheelCanvas.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
+        e.preventDefault(); // Lock page scrolling specifically when touching/interacting with the color wheel
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
-}, { passive: true });
+}, { passive: false });
 
 wheelCanvas.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1) {
+        e.preventDefault(); // Lock page scrolling while dragging across the color wheel
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
-}, { passive: true });
+}, { passive: false });
 
 opacitySlider.addEventListener('input', (e) => {
     chromaOpacity = e.target.value / 100;
@@ -235,7 +237,6 @@ function updateCanvasDimensions() {
 
     canvasContainer.className = "relative overflow-hidden rounded-2xl shadow-2xl flex items-center justify-center bg-black/40 border border-white/10 select-none";
 
-    // Switch from object-contain/cover to absolute filling so it spans exact container bounds without bottom padding/gaps
     if (isFullscreen) {
         previewImg.className = "absolute inset-0 w-full h-full object-cover z-10 pointer-events-auto cursor-grab active:cursor-grabbing";
     } else {
@@ -371,3 +372,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
+                    
