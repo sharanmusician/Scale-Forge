@@ -210,24 +210,7 @@ colorHex.addEventListener('input', (e) => {
 });
 
 function applyTransform() {
-    if (!isFullscreen) {
-        previewImg.style.transform = 'none';
-        return;
-    }
-    const containerRect = canvasContainer.getBoundingClientRect();
-    const imgRect = previewImg.getBoundingClientRect();
-    
-    const baseW = imgRect.width / currentZoom;
-    const baseH = imgRect.height / currentZoom;
-    const scaledW = baseW * currentZoom;
-    const scaledH = baseH * currentZoom;
-
-    const maxOffsetX = Math.max(0, (scaledW - containerRect.width) / 2);
-    const maxOffsetY = Math.max(0, (scaledH - containerRect.height) / 2);
-
-    panOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, panOffsetX));
-    panOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, panOffsetY));
-
+    previewImg.style.transition = 'none';
     previewImg.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px) scale(${currentZoom})`;
 }
 
@@ -251,14 +234,13 @@ function updateCanvasDimensions() {
     canvasContainer.style.height = `${targetHeight}px`;
 
     if (isFullscreen) {
-        previewImg.className = "w-full h-full object-cover z-10 relative transition-none pointer-events-auto cursor-grab active:cursor-grabbing";
-        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        applyTransform();
+        previewImg.className = "w-full h-full object-cover z-10 relative pointer-events-auto cursor-grab active:cursor-grabbing";
     } else {
-        previewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
-        previewImg.style.transform = 'none';
+        previewImg.className = "max-w-full max-h-full object-contain z-10 relative pointer-events-none";
     }
+    
+    miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none";
+    applyTransform();
 
     const maxMiniW = 180;
     const maxMiniH = 108;
@@ -282,31 +264,6 @@ function updateCanvasDimensions() {
     }
 }
 
-previewImg.addEventListener('mousedown', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
-    isDragging = true;
-    startX = e.clientX - panOffsetX;
-    startY = e.clientY - panOffsetY;
-    previewImg.style.cursor = 'grabbing';
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (!isDragging || !isFullscreen) return;
-    panOffsetX = e.clientX - startX;
-    panOffsetY = e.clientY - startY;
-
-    applyTransform();
-});
-
-window.addEventListener('mouseup', () => {
-    if (isDragging) {
-        isDragging = false;
-        if (isFullscreen && currentImgSrc) {
-            previewImg.style.cursor = 'grab';
-        }
-    }
-});
-
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
 }, { passive: false });
@@ -320,17 +277,16 @@ document.addEventListener('gestureend', (e) => {
 }, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
-    if (e.touches.length > 1 && !canvasContainer.contains(e.target)) {
+    if (!canvasContainer.contains(e.target)) {
         e.preventDefault();
     }
 }, { passive: false });
 
 canvasContainer.addEventListener('touchstart', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
+    if (!currentImgSrc || !isFullscreen) return;
     
     if (e.touches.length === 2) {
         e.preventDefault();
-        isDragging = false;
         initialPinchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
@@ -340,15 +296,11 @@ canvasContainer.addEventListener('touchstart', (e) => {
         initialPanY = panOffsetY;
         pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    } else if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX - panOffsetX;
-        startY = e.touches[0].clientY - panOffsetY;
     }
 }, { passive: false });
 
 canvasContainer.addEventListener('touchmove', (e) => {
-    if (!isFullscreen || !currentImgSrc) return;
+    if (!currentImgSrc || !isFullscreen) return;
 
     if (e.touches.length === 2) {
         e.preventDefault();
@@ -371,11 +323,8 @@ canvasContainer.addEventListener('touchmove', (e) => {
             
             applyTransform();
         }
-    } else if (isDragging && e.touches.length === 1) {
-        panOffsetX = e.touches[0].clientX - startX;
-        panOffsetY = e.touches[0].clientY - startY;
-
-        applyTransform();
+    } else if (e.touches.length === 1) {
+        e.preventDefault();
     }
 }, { passive: false });
 
@@ -383,14 +332,11 @@ window.addEventListener('touchend', (e) => {
     if (e.touches.length < 2) {
         initialPinchDist = 0;
     }
-    if (e.touches.length === 0) {
-        isDragging = false;
-    }
 }, { passive: true });
 
 downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    if (!currentImgSrc || downloadBtn.disabled) return;
+    if (!currentImgSrc) return;
 
     const exportCanvas = document.createElement('canvas');
     const ctx = exportCanvas.getContext('2d');
@@ -408,6 +354,7 @@ downloadBtn.addEventListener('click', (e) => {
     exportCanvas.height = outHeight;
 
     const baseImg = new Image();
+    baseImg.crossOrigin = "anonymous";
     baseImg.onload = () => {
         if (backgroundType === 'solid') {
             const r = parseInt(chromaColor.slice(1, 3), 16);
@@ -415,8 +362,24 @@ downloadBtn.addEventListener('click', (e) => {
             const b = parseInt(chromaColor.slice(5, 7), 16);
             ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
             ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        } else {
+            ctx.filter = `blur(${blurRadius}px)`;
+            ctx.drawImage(baseImg, 0, 0, exportCanvas.width, exportCanvas.height);
+            ctx.filter = 'none';
         }
+
+        const x = (exportCanvas.width - (nativeWidth * currentZoom)) / 2 + panOffsetX;
+        const y = (exportCanvas.height - (nativeHeight * currentZoom)) / 2 + panOffsetY;
+        const w = nativeWidth * currentZoom;
+        const h = nativeHeight * currentZoom;
+
+        ctx.drawImage(baseImg, x, y, w, h);
+
+        const link = document.createElement('a');
+        link.download = 'styled-image.png';
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
     };
     baseImg.src = currentImgSrc;
 });
-        
+            
