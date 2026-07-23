@@ -276,12 +276,6 @@ document.addEventListener('gestureend', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-document.addEventListener('touchmove', (e) => {
-    if (!canvasContainer.contains(e.target)) {
-        e.preventDefault();
-    }
-}, { passive: false });
-
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!currentImgSrc || !isFullscreen) return;
     
@@ -323,8 +317,6 @@ canvasContainer.addEventListener('touchmove', (e) => {
             
             applyTransform();
         }
-    } else if (e.touches.length === 1) {
-        e.preventDefault();
     }
 }, { passive: false });
 
@@ -382,4 +374,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-            
+                                 
