@@ -1,4 +1,4 @@
-// canvas-engine.js
+// canvas-engine.js (Updated with full transparent export support)
 
 blurSlider.addEventListener('input', (e) => {
     blurRadius = e.target.value;
@@ -116,14 +116,14 @@ wheelCanvas.addEventListener('mousedown', (e) => {
 
 wheelCanvas.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
-        e.preventDefault(); // Lock page scrolling specifically when touching/interacting with the color wheel
+        e.preventDefault();
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
 }, { passive: false });
 
 wheelCanvas.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1) {
-        e.preventDefault(); // Lock page scrolling while dragging across the color wheel
+        e.preventDefault();
         handleWheelSelection(e.touches[0].clientX, e.touches[0].clientY);
     }
 }, { passive: false });
@@ -270,12 +270,10 @@ function updateCanvasDimensions() {
     }
 }
 
-// Prevent browser default pinch-zoom globally
 document.addEventListener('gesturestart', (e) => { e.preventDefault(); }, { passive: false });
 document.addEventListener('gesturechange', (e) => { e.preventDefault(); }, { passive: false });
 document.addEventListener('gestureend', (e) => { e.preventDefault(); }, { passive: false });
 
-// Only prevent default touch behavior inside canvas *strictly* when performing multi-touch pinch zooming
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!currentImgSrc || !isFullscreen) return;
     
@@ -350,7 +348,10 @@ downloadBtn.addEventListener('click', (e) => {
     const baseImg = new Image();
     baseImg.crossOrigin = "anonymous";
     baseImg.onload = () => {
-        // Render background only if 'background' is selected
+        // Clear canvas explicitly to ensure transparency when 'transparent' option is selected
+        ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+        // Render background only if 'background' is explicitly chosen
         if (exportFormat === 'background') {
             if (backgroundType === 'solid') {
                 const r = parseInt(chromaColor.slice(1, 3), 16);
@@ -364,7 +365,6 @@ downloadBtn.addEventListener('click', (e) => {
                 ctx.filter = 'none';
             }
         }
-        // If exportFormat is 'transparent', background layer is skipped entirely
 
         const x = (exportCanvas.width - (nativeWidth * currentZoom)) / 2 + panOffsetX;
         const y = (exportCanvas.height - (nativeHeight * currentZoom)) / 2 + panOffsetY;
@@ -380,3 +380,4 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
+            
