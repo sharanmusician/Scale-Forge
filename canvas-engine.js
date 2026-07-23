@@ -264,18 +264,12 @@ function updateCanvasDimensions() {
     }
 }
 
-document.addEventListener('gesturestart', (e) => {
-    e.preventDefault();
-}, { passive: false });
+// Prevent browser default pinch-zoom and gesture zooming globally
+document.addEventListener('gesturestart', (e) => { e.preventDefault(); }, { passive: false });
+document.addEventListener('gesturechange', (e) => { e.preventDefault(); }, { passive: false });
+document.addEventListener('gestureend', (e) => { e.preventDefault(); }, { passive: false });
 
-document.addEventListener('gesturechange', (e) => {
-    e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('gestureend', (e) => {
-    e.preventDefault();
-}, { passive: false });
-
+// Only prevent default touch behavior (pinching/scrolling) when touching *inside* the canvas container
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!currentImgSrc || !isFullscreen) return;
     
@@ -374,4 +368,3 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-                                 
