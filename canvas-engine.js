@@ -1,3 +1,5 @@
+// canvas-engine.js
+
 blurSlider.addEventListener('input', (e) => {
     blurRadius = e.target.value;
     blurValDisplay.innerText = `${blurRadius}px`;
@@ -328,6 +330,8 @@ downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
     if (!currentImgSrc) return;
 
+    const exportFormat = document.getElementById('exportFormat') ? document.getElementById('exportFormat').value : 'background';
+
     const exportCanvas = document.createElement('canvas');
     const ctx = exportCanvas.getContext('2d');
 
@@ -346,17 +350,21 @@ downloadBtn.addEventListener('click', (e) => {
     const baseImg = new Image();
     baseImg.crossOrigin = "anonymous";
     baseImg.onload = () => {
-        if (backgroundType === 'solid') {
-            const r = parseInt(chromaColor.slice(1, 3), 16);
-            const g = parseInt(chromaColor.slice(3, 5), 16);
-            const b = parseInt(chromaColor.slice(5, 7), 16);
-            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-        } else {
-            ctx.filter = `blur(${blurRadius}px)`;
-            ctx.drawImage(baseImg, 0, 0, exportCanvas.width, exportCanvas.height);
-            ctx.filter = 'none';
+        // Render background only if 'background' is selected
+        if (exportFormat === 'background') {
+            if (backgroundType === 'solid') {
+                const r = parseInt(chromaColor.slice(1, 3), 16);
+                const g = parseInt(chromaColor.slice(3, 5), 16);
+                const b = parseInt(chromaColor.slice(5, 7), 16);
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            } else {
+                ctx.filter = `blur(${blurRadius}px)`;
+                ctx.drawImage(baseImg, 0, 0, exportCanvas.width, exportCanvas.height);
+                ctx.filter = 'none';
+            }
         }
+        // If exportFormat is 'transparent', background layer is skipped entirely
 
         const x = (exportCanvas.width - (nativeWidth * currentZoom)) / 2 + panOffsetX;
         const y = (exportCanvas.height - (nativeHeight * currentZoom)) / 2 + panOffsetY;
@@ -366,10 +374,9 @@ downloadBtn.addEventListener('click', (e) => {
         ctx.drawImage(baseImg, x, y, w, h);
 
         const link = document.createElement('a');
-        link.download = 'styled-image.png';
+        link.download = exportFormat === 'transparent' ? 'transparent-image.png' : 'styled-image.png';
         link.href = exportCanvas.toDataURL('image/png');
         link.click();
     };
     baseImg.src = currentImgSrc;
 });
-                    
