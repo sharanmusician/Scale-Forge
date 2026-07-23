@@ -233,16 +233,16 @@ function updateCanvasDimensions() {
     canvasContainer.style.width = `${targetWidth}px`;
     canvasContainer.style.height = `${targetHeight}px`;
 
-    // Ensure flex centering and zero baseline gaps for preview image container wrappers
     canvasContainer.className = "relative overflow-hidden rounded-2xl shadow-2xl flex items-center justify-center bg-black/40 border border-white/10 select-none";
 
+    // Switch from object-contain/cover to absolute filling so it spans exact container bounds without bottom padding/gaps
     if (isFullscreen) {
-        previewImg.className = "w-full h-full object-cover z-10 relative pointer-events-auto cursor-grab active:cursor-grabbing block";
+        previewImg.className = "absolute inset-0 w-full h-full object-cover z-10 pointer-events-auto cursor-grab active:cursor-grabbing";
     } else {
-        previewImg.className = "max-w-full max-h-full object-contain z-10 relative pointer-events-none block";
+        previewImg.className = "absolute inset-0 w-full h-full object-contain z-10 pointer-events-none";
     }
     
-    miniPreviewImg.className = "max-w-full max-h-full object-contain z-10 relative transition-all duration-300 pointer-events-none block";
+    miniPreviewImg.className = "absolute inset-0 w-full h-full object-contain z-10 transition-all duration-300 pointer-events-none";
     applyTransform();
 
     const maxMiniW = 180;
@@ -371,4 +371,3 @@ downloadBtn.addEventListener('click', (e) => {
     };
     baseImg.src = currentImgSrc;
 });
-                    
