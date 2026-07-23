@@ -264,12 +264,12 @@ function updateCanvasDimensions() {
     }
 }
 
-// Prevent browser default pinch-zoom and gesture zooming globally
+// Prevent browser default pinch-zoom globally
 document.addEventListener('gesturestart', (e) => { e.preventDefault(); }, { passive: false });
 document.addEventListener('gesturechange', (e) => { e.preventDefault(); }, { passive: false });
 document.addEventListener('gestureend', (e) => { e.preventDefault(); }, { passive: false });
 
-// Only prevent default touch behavior (pinching/scrolling) when touching *inside* the canvas container
+// Only prevent default touch behavior inside canvas *strictly* when performing multi-touch pinch zooming
 canvasContainer.addEventListener('touchstart', (e) => {
     if (!currentImgSrc || !isFullscreen) return;
     
