@@ -178,4 +178,4 @@ function setBgType(type) {
         updateCursorPosition();
         updateChromaBackground();
     }
-}
+            }
